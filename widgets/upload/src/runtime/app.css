@@ -1,0 +1,52 @@
+.clickable-span {
+    cursor: pointer;
+    color: white;
+}
+
+.clickable-span:hover {
+    text-decoration: underline;
+}
+
+
+.download-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    padding-right: 20px;
+    /* border: 1px solid #000; */
+}
+
+.downloadRow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 350px;
+}
+
+.download-cols {
+    height: inherit;
+}
+
+.content {
+    text-align: center;
+}
+
+.success {
+    color: green;
+    font-weight: bolder;
+}
+
+.unsuccessful {
+    color: red;
+    font-weight: bolder;
+}
+
+.nothing {
+    color: black;
+}
+
