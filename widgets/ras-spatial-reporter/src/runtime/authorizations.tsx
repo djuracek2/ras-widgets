@@ -24,32 +24,32 @@ const Authorizations = (styles) => {
   const [authOutString, setAuthOutString] = useState('')
   const [AuthDates, setAuthDates] = useState('')
 
-  function handleEffectiveDate (type, event) {
+  function handleEffectiveDate (type, val) {
     if (type === 'begin') {
-      setEffBegin(event.target.value)
+      setEffBegin(val)
       console.log(effBegin)
     } else {
-      setEffEnd(event.target.value)
+      setEffEnd(val)
       console.log(effEnd)
     }
   }
 
-  function handleExpirationDate (type, event) {
+  function handleExpirationDate (type, val) {
     if (type === 'begin') {
-      setExpBegin(event.target.value)
+      setExpBegin(val)
       console.log(expBegin)
     } else {
-      setExpEnd(event.target.value)
+      setExpEnd(val)
       console.log(expEnd)
     }
   }
 
-  function handleIssueDate (type, event) {
+  function handleIssueDate (type, val) {
     if (type === 'begin') {
-      setIssBegin(event.target.value)
+      setIssBegin(val)
       console.log(issBegin)
     } else {
-      setIssEnd(event.target.value)
+      setIssEnd(val)
       console.log(issEnd)
     }
   }
@@ -364,14 +364,14 @@ const Authorizations = (styles) => {
                     <div style={ styles.styles.datetime}>
                     <div
                       style={{
-                        width: 150
+                        width: 200
                       }}
                     >
                       <DatePicker
                         aria-describedby="date-picker-desc-id"
                         aria-label="DateTime picker label"
                         format="shortDateLongTime"
-                        onChange={(e) => { handleEffectiveDate('begin', e) }}
+                        onChange={(val) => { handleEffectiveDate('begin', val) }}
                         // selectedDate={new Date("2022-07-30T06:00:00.000Z")}
                         strategy="absolute"
                         virtualDateList={[
@@ -391,14 +391,14 @@ const Authorizations = (styles) => {
                     <Label style={{ display: 'flex', alignItems: 'center', padding: '5px', paddingTop: '10px' }}>between:</Label>
                   <div
                         style={{
-                          width: 150
+                          width: 200
                         }}
                       >
                         <DatePicker
                           aria-describedby="date-picker-desc-id"
                           aria-label="DateTime picker label"
                           format="shortDateLongTime"
-                          onChange={(e) => { handleEffectiveDate('end', e) }}
+                          onChange={(val) => { handleEffectiveDate('end', val) }}
                           // selectedDate={new Date("2022-07-30T06:00:00.000Z")}
                           strategy="absolute"
                           virtualDateList={[
@@ -414,15 +414,14 @@ const Authorizations = (styles) => {
                     <div style={ styles.styles.datetime}>
                     <div
                       style={{
-                        width: 150
+                        width: 200
                       }}
                     >
                       <DatePicker
                         aria-describedby="date-picker-desc-id"
                         aria-label="DateTime picker label"
                         format="shortDateLongTime"
-                        onChange={(e) => { handleExpirationDate('begin', e) }}
-                        showDoneButton
+                        onChange={(val) => { handleExpirationDate('begin', val) }}
                         strategy="absolute"
                         virtualDateList={[
                           'NOW',
@@ -433,15 +432,14 @@ const Authorizations = (styles) => {
                     <Label style={{ display: 'flex', alignItems: 'center', padding: '5px', paddingTop: '10px' }}>between:</Label>
                   <div
                         style={{
-                          width: 150
+                          width: 200
                         }}
                       >
                         <DatePicker
                           aria-describedby="date-picker-desc-id"
                           aria-label="DateTime picker label"
                           format="shortDateLongTime"
-                          onChange={(e) => { handleExpirationDate('end', e) }}
-                          showDoneButton
+                          onChange={(val) => { handleExpirationDate('end', val) }}
                           strategy="absolute"
                           virtualDateList={[
                             'NOW',
@@ -464,7 +462,7 @@ const Authorizations = (styles) => {
                         aria-describedby="date-picker-desc-id"
                         aria-label="DateTime picker label"
                         format="shortDateLongTime"
-                        onChange={(e) => { handleIssueDate('begin', e) }}
+                        onChange={(val) => { handleIssueDate('begin', val) }}
                         // selectedDate={new Date("2022-07-30T06:00:00.000Z")}
                         showDoneButton
                         strategy="absolute"
@@ -484,7 +482,7 @@ const Authorizations = (styles) => {
                           aria-describedby="date-picker-desc-id"
                           aria-label="DateTime picker label"
                           format="shortDateLongTime"
-                          onChange={(e) => { handleIssueDate('end', e) }}
+                          onChange={(val) => { handleIssueDate('end', val) }}
                           showDoneButton
                           strategy="absolute"
                           virtualDateList={[
