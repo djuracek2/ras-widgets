@@ -139,14 +139,14 @@ const handleChange = (changes) => {
         console.log(result)
     })
   }
-useEffect(() => {
-  async function triggerFilterBuilder () {
-    for (const fields of queryItems) {
-      await generateFields(fields.field)
-    }
-  }
-  triggerFilterBuilder()
-})
+// useEffect(() => {
+//   async function triggerFilterBuilder () {
+//     for (const fields of queryItems) {
+//       await generateFields(fields.field)
+//     }
+//   }
+//   triggerFilterBuilder()
+// })
 
 
   useEffect(() => {
@@ -189,7 +189,7 @@ useEffect(() => {
       <div className='reviewer-div' style={{ color: 'white' }}>
         <Header checked={checked} toggleSwitch={toggleSwitch}></Header>
       { checked
-      ? <Main success={success} failure={failure}></Main>
+      ? <Main success={success} failure={failure} sjmv={sjmv}></Main>
         : ''}
       </div>
       <div

@@ -9,6 +9,7 @@ const Allotments = (styles) => {
   const [allotAccept, setAllotAccept] = useState(false)
   const [allotReject, setAllotReject] = useState(false)
   const [allotReview, setAllotReview] = useState(false)
+  const [outQueryStringAllotment, setOutQueryStringAllotment] = useState('')
 
   function handleCheckBoxChange (checkboxid, checked) {
     console.log(checkboxid, checked)
@@ -20,6 +21,23 @@ const Allotments = (styles) => {
       setAllotReview(!allotReview)
     }
   }
+
+  useEffect(() => {
+    let outQueryStringAllotmentApp = ""
+    //check for approval flags
+    if (allotAccept) {
+      outQueryStringAllotment = " ( APPROVAL_FLAG='Y' ) "
+    }
+
+    if (allotReject) {
+      if (outQueryStringAllotment !== "") {
+        outQueryStringAllotment = "( " +  " APPROVAL_FLAG='Y' " + " OR APPROVAL_FLAG='Y' ) "
+      } else {
+        outQueryStringAllotment = " ( APPROVAL_FLAG='N' )"
+      }
+    }
+    setOutQueryStringAllotment(outQueryStringAllotmentApp)
+  })
 
   function handleAllotmentSelect (event) {
     setAllotmentValue(event.target.value)
