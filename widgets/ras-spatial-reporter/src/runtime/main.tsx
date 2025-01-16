@@ -36,14 +36,14 @@ const Main = ({ success, failure, sjmv }) => {
   function handleCancel () {
     console.log('handle reset...')
   }
-  function zoomToDistrict () {
+  function zoomToDistrict (district: string) {
     const DistrictLayerUrl = config.queryLayers.districtLayer
     const DistrictLayer = new FeatureLayer({ url: DistrictLayerUrl })
 
     console.log(config)
     let query
     query = DistrictLayer.createQuery()
-    query.where = `PARENT_NAME = '${districtOffice}'`
+    query.where = `PARENT_NAME = '${district}'`
     query.returnGeometry = true
     query.outFields = ['*']
 
@@ -83,14 +83,14 @@ const Main = ({ success, failure, sjmv }) => {
     })
   }
 
-  function zoomToOffice () {
+  function zoomToOffice (office: string) {
     const OfficeLayerUrl = config.queryLayers.officeLayer
     const OfficeLayer = new FeatureLayer({ url: OfficeLayerUrl })
 
     console.log(config)
     let query
     query = OfficeLayer.createQuery()
-    query.where = `ADMU_NAME = '${fieldOffice}'`
+    query.where = `ADMU_NAME = '${office}'`
     query.returnGeometry = true
     query.outFields = ['*']
 
@@ -229,16 +229,18 @@ const Main = ({ success, failure, sjmv }) => {
   }
 
   const handleDistrictOfficeChange = (event) => {
+    const district = event.target.value
     handleDistrictOffice(event.target.value)
-    zoomToDistrict()
+    zoomToDistrict(district)
     // queryOffice()
 
     console.log(districtOffice)
   }
 
   const handleFieldOfficeChange = (event) => {
-    handleFieldOffice(event.target.value)
-    zoomToOffice()
+    const office = event.target.value
+    handleFieldOffice(office)
+    zoomToOffice(office)
     console.log(fieldOffice)
   }
 
