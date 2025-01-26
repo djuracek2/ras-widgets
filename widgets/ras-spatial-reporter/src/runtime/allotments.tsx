@@ -1,14 +1,19 @@
-import { React, type AllWidgetProps } from "jimu-core";
+import { React, type AllWidgetProps } from 'jimu-core'
 import { useState, useEffect, useRef } from 'react'
-import { Checkbox, Label, Switch, TextInput, Button, ButtonGroup, Select, Option, CollapsablePanel, Radio } from "jimu-ui";
+import { Checkbox, Label, Switch, TextInput, Button, ButtonGroup, Select, Option, CollapsablePanel, Radio } from 'jimu-ui'
 import { DatePicker } from 'jimu-ui/basic/date-picker'
+import { TableArrangeType } from 'dist/widgets/common/table/src/config'
+import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
+import config from '../configs/config.json'
 
-const Allotments = (styles) => {
+const Allotments = ({ styles, stateSel, districtOffice, office }) => {
   const [allotmentValue, setAllotmentValue] = useState('')
   const [allotGroupValue, setAllotGroupValue] = useState('')
   const [allotAccept, setAllotAccept] = useState(false)
   const [allotReject, setAllotReject] = useState(false)
   const [allotReview, setAllotReview] = useState(false)
+  const [allotGroupList, setAllotGroupList] = useState('')
+  const [allotList, setAllotList] = useState('')
   const [outQueryStringAllotment, setOutQueryStringAllotment] = useState('')
 
   function handleCheckBoxChange (checkboxid, checked) {
@@ -22,18 +27,59 @@ const Allotments = (styles) => {
     }
   }
 
+  function populateAllotment (office: string) {
+    const allotPolyLayer = new FeatureLayer({
+      url: config.queryLayers.allotmentPolyLayer
+    })
+
+    console.log(allotPolyLayer)
+
+    let query = allotPolyLayer.createQuery()
+    query.returnGeometry = false
+    query.outFields = ['*']
+    query.where = `ADMIN_UNIT_CD = '${office}'`
+
+    allotPolyLayer.queryFeatures(query).then(function (response) {
+      console.log(response)
+    })
+  }
+
+  function populateAllotmentGroup (office: string) {
+    console.log(office)
+    const allotTable = new FeatureLayer({
+      url: config.queryLayers.allotmentGroupTable
+    })
+    console.log(allotTable)
+
+    let query = allotTable.createQuery()
+    //ADMIN_OFC_CD = 'LLCOS00000'
+    query.returnGeometry = false
+    query.outFields = ['*']
+    query.where = "ADMIN_OFC_CD = 'LL" + office + "'"
+
+    allotTable.queryFeatures(query).then(function (response) {
+      console.log(response)
+    })
+  }
+
   useEffect(() => {
-    let outQueryStringAllotmentApp = ""
+    populateAllotment(office)
+    populateAllotmentGroup(office)
+    // populate allotments & group on office change
+  }, [office])
+
+  useEffect(() => {
+    let outQueryStringAllotmentApp = ''
     //check for approval flags
     if (allotAccept) {
-      outQueryStringAllotment = " ( APPROVAL_FLAG='Y' ) "
+      outQueryStringAllotmentApp = " ( APPROVAL_FLAG='Y' ) "
     }
 
     if (allotReject) {
-      if (outQueryStringAllotment !== "") {
-        outQueryStringAllotment = "( " +  " APPROVAL_FLAG='Y' " + " OR APPROVAL_FLAG='Y' ) "
+      if (outQueryStringAllotmentApp !== '') {
+        outQueryStringAllotmentApp = '( ' + " APPROVAL_FLAG='Y' " + " OR APPROVAL_FLAG='Y' ) "
       } else {
-        outQueryStringAllotment = " ( APPROVAL_FLAG='N' )"
+        outQueryStringAllotmentApp = " ( APPROVAL_FLAG='N' )"
       }
     }
     setOutQueryStringAllotment(outQueryStringAllotmentApp)
@@ -52,7 +98,6 @@ const Allotments = (styles) => {
     <>
     <CollapsablePanel
             label="Allotments"
-            defaultIsOpen="true"
             level={0}
             type="default"
             style={{
@@ -65,7 +110,7 @@ const Allotments = (styles) => {
               }}
             >
               <label>Review Status:</label>
-              <div style={styles.styles.container}>
+              <div style={styles.container}>
                 <br></br>
                 <Label
                   centric

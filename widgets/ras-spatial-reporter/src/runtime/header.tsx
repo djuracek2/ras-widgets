@@ -2,7 +2,7 @@ import { React, type AllWidgetProps } from "jimu-core";
 import { useState, useEffect, useRef } from 'react'
 import { Label, Switch } from 'jimu-ui'
 
-const Header = ({ toggleSwitch, checked }) => {
+const Header = ({ toggleSwitch, isLoading, checked }) => {
   return (
     <>
         <Label centric className="d-flex">
@@ -13,9 +13,9 @@ const Header = ({ toggleSwitch, checked }) => {
         </div>
         <br></br>
         <Label>
-        <Switch aria-label="Switch" checked={checked} onChange={toggleSwitch}/>
+        <Switch aria-label="Switch" disabled={isLoading} checked={checked} onChange={toggleSwitch}/>
             Filter by State/District/Field Offices
-        </Label>
+        </Label> 
     </>)
 }
 

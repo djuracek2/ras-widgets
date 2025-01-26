@@ -14,23 +14,35 @@ const Authorizations = (styles) => {
   const [_402, set402] = useState(false)
   const [fullyPro, setfullyPro] = useState(false)
   const [decStayed, setDecStayed] = useState(false)
-  const [effBegin, setEffBegin] = useState('')
-  const [effEnd, setEffEnd] = useState('')
-  const [expBegin, setExpBegin] = useState('')
-  const [expEnd, setExpEnd] = useState('')
+
+  const [effBegin, setEffBegin] = useState<Date | null>(new Date("2022-07-30T06:00:00.000Z"))
+  const [effEnd, setEffEnd] = useState<Date | null>(new Date())
+  const [expBegin, setExpBegin] = useState<Date | null>(new Date("2022-07-30T06:00:00.000Z"))
+  const [expEnd, setExpEnd] = useState<Date | null>(new Date())
   const [issBegin, setIssBegin] = useState('')
   const [issEnd, setIssEnd] = useState('')
+
   const [queryStringAuthorizationAuth, setQueryStringAuthorizationAuth] = useState('')
   const [authOutString, setAuthOutString] = useState('')
   const [AuthDates, setAuthDates] = useState('')
 
+
   function handleEffectiveDate (type, val) {
     if (type === 'begin') {
+      // might need to change these to formattedBegData for query on feature service?
+      // or add another state?
+      let effectiveBegin = new Date(val)
+      effectiveBegin.setDate(effectiveBegin.getDate() + 1)
+      let formattedBegDate = effectiveBegin.toISOString().split('T')[0]
       setEffBegin(val)
-      console.log(effBegin)
+      console.log(formattedBegDate)
     } else {
+      // here too
+      let effectiveEnd = new Date(val)
+      effectiveEnd.setDate(effectiveEnd.getDate() + 1)
+      let formattedEndDate = effectiveEnd.toISOString().split('T')[0]
       setEffEnd(val)
-      console.log(effEnd)
+      console.log(formattedEndDate)
     }
   }
 
@@ -191,7 +203,7 @@ const Authorizations = (styles) => {
     <>
        <CollapsablePanel
             label="Authorizations"
-            defaultIsOpen="true"
+            
             level={0}
             type="default"
             style={{
@@ -354,6 +366,7 @@ const Authorizations = (styles) => {
                   aria-label="DECISION STAYED"
                   defaultChecked
                   onChange={(e) => { handleCheckBoxChange('dec-stayed', e.target.checked) }}
+                  checked={decStayed}
                   onClick={() => {}}
                 />
                 DECISION STAYED
@@ -362,23 +375,27 @@ const Authorizations = (styles) => {
                 <div>
                 <Label>Effective Date:</Label>
                     <div style={ styles.styles.datetime}>
+              
                     <div
                       style={{
                         width: 200
                       }}
+
                     >
+                 
                       <DatePicker
                         aria-describedby="date-picker-desc-id"
                         aria-label="DateTime picker label"
                         format="shortDateLongTime"
                         onChange={(val) => { handleEffectiveDate('begin', val) }}
-                        // selectedDate={new Date("2022-07-30T06:00:00.000Z")}
+                        selectedDate={effBegin}
                         strategy="absolute"
                         virtualDateList={[
                           'NOW',
                           'YESTERDAY'
                         ]}
                       />
+               
                       <div
                         id="date-picker-desc-id"
                         style={{
@@ -388,6 +405,7 @@ const Authorizations = (styles) => {
                         This is desc
                       </div>
                     </div>
+              
                     <Label style={{ display: 'flex', alignItems: 'center', padding: '5px', paddingTop: '10px' }}>between:</Label>
                   <div
                         style={{
@@ -399,8 +417,9 @@ const Authorizations = (styles) => {
                           aria-label="DateTime picker label"
                           format="shortDateLongTime"
                           onChange={(val) => { handleEffectiveDate('end', val) }}
-                          // selectedDate={new Date("2022-07-30T06:00:00.000Z")}
+                          selectedDate={effEnd}
                           strategy="absolute"
+                          showQuickNavToToday
                           virtualDateList={[
                             'NOW',
                             'YESTERDAY'
@@ -421,8 +440,10 @@ const Authorizations = (styles) => {
                         aria-describedby="date-picker-desc-id"
                         aria-label="DateTime picker label"
                         format="shortDateLongTime"
+                        selectedDate={expBegin}
                         onChange={(val) => { handleExpirationDate('begin', val) }}
                         strategy="absolute"
+                        showQuickNavToToday
                         virtualDateList={[
                           'NOW',
                           'YESTERDAY'
@@ -439,8 +460,10 @@ const Authorizations = (styles) => {
                           aria-describedby="date-picker-desc-id"
                           aria-label="DateTime picker label"
                           format="shortDateLongTime"
+                          selectedDate={expEnd}
                           onChange={(val) => { handleExpirationDate('end', val) }}
                           strategy="absolute"
+                          showQuickNavToToday
                           virtualDateList={[
                             'NOW',
                             'YESTERDAY'

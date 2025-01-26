@@ -1,7 +1,8 @@
-import { React, type AllWidgetProps } from "jimu-core";
-import { useState, useEffect, useRef } from 'react'
-import { Checkbox, Label, Switch, TextInput, Button, ButtonGroup, Select, Option, CollapsablePanel, Radio } from "jimu-ui";
-import { DatePicker } from 'jimu-ui/basic/date-picker'
+import { React, type AllWidgetProps } from 'jimu-core'
+import { useState, useEffect } from 'react'
+import { Checkbox, Label, Select, Option, CollapsablePanel } from 'jimu-ui'
+import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
+import config from '../configs/config.json'
 
 const BilledUse = (styles) => {
   const [burro, setBurro] = useState(false)
@@ -13,6 +14,9 @@ const BilledUse = (styles) => {
   const [ind, setInd] = useState(false)
   const [grazingYear, setGrazingYear] = useState('')
   const [scheduleType, setScheduleType] = useState('')
+  const [billYearOptions, setBillYearOptions] = useState([])
+  const [billScheduleOptions, setBillScheduleOptions] = useState([])
+  const [billedUseString, setBilledUseString] = useState('')
 
   function handleGrazingYear (event) {
     setGrazingYear(event.target.value)
@@ -22,6 +26,57 @@ const BilledUse = (styles) => {
   function handleScheduleType (event) {
     setScheduleType(event.target.value)
     console.log(scheduleType)
+  }
+
+  useEffect(() => {
+    queryBillYear()
+    queryBillScheduleType()
+  }, [])
+
+  function queryBillYear () {
+    const BillLayerUrl = config.queryLayers.authUseTable
+    const BillLayer = new FeatureLayer({ url: BillLayerUrl })
+
+    console.log(config)
+    let query
+    query = BillLayer.createQuery()
+    query.where = '1=1'
+    query.returnGeometry = false
+    query.outFields = ['GRAZING_FEE_YEAR_TX']
+    query.returnDistinctValues = true
+
+    BillLayer.queryFeatures(query).then(function (result) {
+      if (result.features.length > 0) {
+        console.log(result.features)
+        const features = result.features
+        console.log(features)
+        setBillYearOptions(features)
+        console.log(features)
+      }
+    })
+  }
+
+  function queryBillScheduleType () {
+    const BillSchedLayerUrl = config.queryLayers.authUseTable
+    const BillSchedLayer = new FeatureLayer({ url: BillSchedLayerUrl })
+
+    console.log(config)
+    let query
+    query = BillSchedLayer.createQuery()
+    query.where = '1=1'
+    query.returnGeometry = false
+    query.returnDistinctValues = true
+    query.outFields = ['USE_TYPE_NM']
+
+    BillSchedLayer.queryFeatures(query).then(function (result) {
+      if (result.features.length > 0) {
+        console.log(result.features)
+        const features = result.features
+        console.log(features)
+        setBillScheduleOptions(features)
+        console.log(features)
+      }
+    })
   }
 
   function handleCheckBoxChange (checkboxid, checked) {
@@ -42,11 +97,120 @@ const BilledUse = (styles) => {
       setInd(!ind)
     }
   }
+
+  useEffect(() => {
+    let outString = ''
+    if (burro) {
+      outString = " ( LIVESTOCK_KIND_NM = 'B - BURRO'"
+    }
+
+    if (cattle) {
+      if (outString === "") {
+        outString = " ( LIVESTOCK_KIND_NM = 'C - CATTLE'";
+      } else {
+        outString = outString + " OR " + " LIVESTOCK_KIND_NM = 'C - CATTLE'";
+      }
+    }
+
+    if (goat) {
+      if (outString === "") {
+        outString = " ( LIVESTOCK_KIND_NM = 'G - GOAT'";
+      } else {
+        outString = outString + " OR " + "LIVESTOCK_KIND_NM = 'G - GOAT'";
+      }
+    }
+
+    if (sheep) {
+      if (outString === "") {
+        outString = " ( LIVESTOCK_KIND_NM = 'S - SHEEP'";
+      } else {
+        outString = outString + " OR " + "LIVESTOCK_KIND_NM = 'S - SHEEP'";
+      }
+    }
+
+    if (horse) {
+      if (outString === "") {
+        outString = " ( LIVESTOCK_KIND_NM = 'H - HORSE'";
+      } else {
+        outString = outString + " OR " + "LIVESTOCK_KIND_NM = 'H - HORSE'";
+      }
+    }
+
+    if (yCattle) {
+      if (outString === "") {
+        outString = " ( LIVESTOCK_KIND_NM = 'Y - YRLING CATTLE'";
+      } else {
+        outString = outString + " OR " + "LIVESTOCK_KIND_NM = 'Y - YRLING CATTLE'";
+      }
+    }
+
+    if (ind) {
+      if (outString === '') {
+        outString = "( LIVESTOCK_KIND_NM = 'I - INDIGENOUS'";
+      } else {
+        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'I - INDIGENOUS'";
+      }
+    }
+
+    if (outString !== '') { outString = outString + " ) "}
+    setBilledUseString(outString)
+    console.log('billed use query string is:', outString)
+  }, [burro, goat, ind, sheep, cattle, horse, yCattle])
+// reaplce with grazing year value selection
+  getQueryGrazingYearDD function(){
+
+    if(widgetContext.selectGrazingYear.value != "" && widgetContext.selectGrazingYear.value != "undefined")
+    {   
+        if(widgetContext.selectGrazingYear.value !== "0")
+        {
+            return  " ( GRAZING_FEE_YEAR_TX = '" +  widgetContext.selectGrazingYear.value + "' ) ";
+        }return "";
+    }return "";
+},
+
+// reaplce with grazing schedule type value selection
+getQueryScheduleTypeDD function(){
+    if(widgetContext.selectBSTU.value != "" && widgetContext.selectBSTU.value != "undefined")
+    {
+        if(widgetContext.selectBSTU.value !== "0")
+        {
+            return  " ( USE_TYPE_NM  = '" +  widgetContext.selectBSTU.value + "' ) ";
+        }return "";
+    }return "";
+},
+
+// this combines the queries for billed use
+//
+getAllBillUsedQueryString function() {
+    var queryStringforBillUsedLiveStock = this._getQueryChkBoxForBillUse();
+    var billUseAllQuery = queryStringforBillUsedLiveStock;
+
+    var queryStringforBillUsedGrazingYear = this._getQueryGrazingYearDD();
+    if (billUseAllQuery !== "" && queryStringforBillUsedGrazingYear !== "") {
+        billUseAllQuery = billUseAllQuery + "  AND " + queryStringforBillUsedGrazingYear;
+    }
+    else {
+        if (queryStringforBillUsedGrazingYear !== "") {
+            billUseAllQuery = queryStringforBillUsedGrazingYear;
+        }
+    }
+
+    var queryStringforBillUsedTypeUse = this._getQueryScheduleTypeDD();
+    if (billUseAllQuery !== "" && queryStringforBillUsedTypeUse !== "") {
+        billUseAllQuery = billUseAllQuery + "  AND " + queryStringforBillUsedTypeUse;
+    }
+    else {
+        if (queryStringforBillUsedTypeUse !== "") {
+            billUseAllQuery = queryStringforBillUsedTypeUse;
+        }
+    }
+    return billUseAllQuery;
+},
+
   return (
     <>
     <CollapsablePanel
             label="Billed Use"
-            defaultIsOpen="true"
             level={0}
             type="default"
             style={{
@@ -172,9 +336,14 @@ const BilledUse = (styles) => {
                     <Label style={{ width: '170px' }}>Grazing Fee Year:</Label>
                 <Select
                 onChange={handleGrazingYear}>
-                <Option value="california">
-                  California
-                </Option>
+              {billYearOptions?.map(year =>
+                          <Option
+                          value={year.attributes.GRAZING_FEE_YEAR_TX
+                          }>
+                              {year.attributes.GRAZING_FEE_YEAR_TX
+                              }
+                          </Option>
+              )}
                 </Select>
               </div>
               <div className="d-flex align-items-center"
@@ -184,9 +353,14 @@ const BilledUse = (styles) => {
                 <Label style={{ width: '170px' }}>Billing Schedule Type Use: </Label>
                 <Select
                 onChange={handleScheduleType}>
-                <Option value="california">
-                  Nebraska
-                </Option>
+                  {billScheduleOptions?.map(year =>
+                          <Option
+                          value={year.attributes.USE_TYPE_NM
+                          }>
+                              {year.attributes.USE_TYPE_NM
+                              }
+                          </Option>
+                  )}
                 </Select>
               </div>
             </div>

@@ -7,6 +7,19 @@
     text-decoration: underline;
 }
 
+.query-loader {
+    position: fixed !important;
+    top: 25% !important;
+    left: 50% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: grey;
+    z-index: 9999 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
 
 .reviewer-container {
     display: flex;

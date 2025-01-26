@@ -1,20 +1,20 @@
-import { React, type AllWidgetProps } from "jimu-core";
-import { useState, useEffect, useRef } from 'react'
-import { Checkbox, Label, Switch, TextInput, Button, ButtonGroup, Select, Option, CollapsablePanel, Radio } from "jimu-ui";
+import { React, type AllWidgetProps } from "jimu-core"
+import { useState } from 'react'
+import { Label, CollapsablePanel, Radio } from "jimu-ui"
 import { DatePicker } from 'jimu-ui/basic/date-picker'
 
 const Inspections = (styles) => {
   const [yes, setYes] = useState(false)
   const [no, setNo] = useState(false)
-  const [beginTime, setBeginTime] = useState('')
-  const [endTime, setEndTime] = useState('')
+  const [beginTime, setBeginTime] = useState<Date | null>(new Date("2022-07-30T06:00:00.000Z"))
+  const [endTime, setEndTime] = useState<Date | null>(new Date())
 
-  function handleTimeBegin (event) {
-    setBeginTime(event.target.value)
-  }
-
-  function handleTimeEnd (event) {
-    setEndTime(event.target.value)
+  function handleTime (type, val) {
+    if (type === 'begin') {
+      setBeginTime(val)
+    } else {
+      setEndTime(val)
+    }
   }
 
   function handleRadio (val) {
@@ -25,6 +25,7 @@ const Inspections = (styles) => {
       setNo(true)
       setYes(false)
     }
+    console.log(yes, no)
   }
   return (
     <>
@@ -47,16 +48,15 @@ const Inspections = (styles) => {
                     <div style={ styles.styles.datetime}>
                     <div
                       style={{
-                        width: 150
+                        width: 200
                       }}
                     >
                       <DatePicker
                         aria-describedby="date-picker-desc-id"
                         aria-label="DateTime picker label"
                         format="shortDateLongTime"
-                        onChange={handleTimeBegin}
-                        // selectedDate={new Date("2022-07-30T06:00:00.000Z")}
-                        showDoneButton
+                        onChange={(val) => { handleTime('begin', val) }}
+                        selectedDate={beginTime}
                         strategy="absolute"
                         virtualDateList={[
                           'NOW',
@@ -67,16 +67,15 @@ const Inspections = (styles) => {
                     <Label style={{ display: 'flex', alignItems: 'center', padding: '5px', paddingTop: '10px' }}>between:</Label>
                   <div
                         style={{
-                          width: 150
+                          width: 200
                         }}
                       >
                         <DatePicker
                           aria-describedby="date-picker-desc-id"
                           aria-label="DateTime picker label"
                           format="shortDateLongTime"
-                          onChange={handleTimeEnd}
-                          // selectedDate={new Date("2022-07-30T06:00:00.000Z")}
-                          showDoneButton
+                          onChange={(val) => { handleTime('end', val) }}
+                          selectedDate={endTime}
                           strategy="absolute"
                           virtualDateList={[
                             'NOW',

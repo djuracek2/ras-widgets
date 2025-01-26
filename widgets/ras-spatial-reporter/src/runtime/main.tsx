@@ -7,245 +7,240 @@ import { DatePicker } from 'jimu-ui/basic/date-picker'
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer'
 import Graphic from '@arcgis/core/Graphic'
-import { array } from 'prop-types'
 
-const Main = ({ success, failure, sjmv }) => {
-  const [stateSel, handleStateSel] = useState(false)
-  const [districtOffice, handleDistrictOffice] = useState(false)
-  const [fieldOffice, handleFieldOffice] = useState(false)
-  const [inputValidation, setInputValidation] = useState(false)
-  const [districtOptions, setDistrictOptions] = useState([])
-  const [officeOptions, setOfficeOptions] = useState([])
-  const graphicLayerRef = useRef<GraphicsLayer>(null)
 
-  useEffect(() => {
-    if (sjmv && !graphicLayerRef.current) {
-      const graphicsLayer = new GraphicsLayer()
-      sjmv.view.map.add(graphicsLayer)
-      graphicLayerRef.current = graphicsLayer
-    }
-  }, [sjmv])
 
-  function runQuery () {
-    console.log('query ran...')
-  }
-  function handleRefresh () {
-    console.log('refresh...')
-  }
+const Main = ({ sharedState }) => {
 
-  function handleCancel () {
-    console.log('handle reset...')
-  }
-  function zoomToDistrict (district: string) {
-    const DistrictLayerUrl = config.queryLayers.districtLayer
-    const DistrictLayer = new FeatureLayer({ url: DistrictLayerUrl })
+  // const [inputValidation, setInputValidation] = useState(false)
+  // const [stateSel, handleStateSel] = useState('')
+  // const [districtOffice, handleDistrictOffice] = useState('')
+  // const [fieldOffice, handleFieldOffice] = useState('')
+  // const [inputValidation, setInputValidation] = useState(false)
+  // const [districtOptions, setDistrictOptions] = useState([])
+  // const [officeOptions, setOfficeOptions] = useState([])
+  // const graphicLayerRef = useRef<GraphicsLayer>(null)
 
-    console.log(config)
-    let query
-    query = DistrictLayer.createQuery()
-    query.where = `PARENT_NAME = '${district}'`
-    query.returnGeometry = true
-    query.outFields = ['*']
+  // useEffect(() => {
+  //   if (sjmv && !graphicLayerRef.current) {
+  //     const graphicsLayer = new GraphicsLayer()
+  //     sjmv.view.map.add(graphicsLayer)
+  //     graphicLayerRef.current = graphicsLayer
+  //   }
+  // }, [sjmv])
 
-    DistrictLayer.queryFeatures(query).then(function (result) {
-      if (result.features.length > 0) {
-        const features = result.features[0]
-        const symbol = {
-          type: 'simple-fill', // autocasts as new SimpleFillSymbol()
-          color: [0, 204, 255, 0.4],
-          style: 'solid',
-          outline: {
-            color: [0, 204, 255, 0.8],
-            width: 2
-          }
-        }
 
-        const graphic = new Graphic({
-          geometry: features.geometry,
-          attributes: features.attributes,
-          symbol: symbol
-        })
+  // function zoomToDistrict (district: string) {
+  //   const DistrictLayerUrl = config.queryLayers.districtLayer
+  //   const DistrictLayer = new FeatureLayer({ url: DistrictLayerUrl })
 
-        if (graphicLayerRef.current) {
-          graphicLayerRef.current.removeAll()
-          graphicLayerRef.current.add(graphic)
-        } else {
-          console.error('Graphics layer not initialized.')
-        }
-        if (sjmv) {
-          sjmv.view.goTo({
-            target: result.features[0]
-          }).catch(function (error) {
-            console.log('Error querying feature service.')
-          })
-        }
-      }
-    })
-  }
+  //   console.log(config)
+  //   let query
+  //   query = DistrictLayer.createQuery()
+  //   query.where = `PARENT_NAME = '${district}'`
+  //   query.returnGeometry = true
+  //   query.outFields = ['*']
 
-  function zoomToOffice (office: string) {
-    const OfficeLayerUrl = config.queryLayers.officeLayer
-    const OfficeLayer = new FeatureLayer({ url: OfficeLayerUrl })
+  //   DistrictLayer.queryFeatures(query).then(function (result) {
+  //     if (result.features.length > 0) {
+  //       const features = result.features[0]
+  //       const symbol = {
+  //         type: 'simple-fill', // autocasts as new SimpleFillSymbol()
+  //         color: [0, 204, 255, 0.4],
+  //         style: 'solid',
+  //         outline: {
+  //           color: [0, 204, 255, 0.8],
+  //           width: 2
+  //         }
+  //       }
 
-    console.log(config)
-    let query
-    query = OfficeLayer.createQuery()
-    query.where = `ADMU_NAME = '${office}'`
-    query.returnGeometry = true
-    query.outFields = ['*']
+  //       const graphic = new Graphic({
+  //         geometry: features.geometry,
+  //         attributes: features.attributes,
+  //         symbol: symbol
+  //       })
 
-    OfficeLayer.queryFeatures(query).then(function (result) {
-      if (result.features.length > 0) {
-        const features = result.features[0]
-        const symbol = {
-          type: 'simple-fill', // autocasts as new SimpleFillSymbol()
-          color: [0, 204, 255, 0.4],
-          style: 'solid',
-          outline: {
-            color: [0, 204, 255, 0.8],
-            width: 2
-          }
-        }
+  //       if (graphicLayerRef.current) {
+  //         graphicLayerRef.current.removeAll()
+  //         graphicLayerRef.current.add(graphic)
+  //       } else {
+  //         console.error('Graphics layer not initialized.')
+  //       }
+  //       if (sjmv) {
+  //         sjmv.view.goTo({
+  //           target: result.features[0]
+  //         }).catch(function (error) {
+  //           console.log('Error querying feature service.')
+  //         })
+  //       }
+  //     }
+  //   })
+  // }
 
-        const graphic = new Graphic({
-          geometry: features.geometry,
-          attributes: features.attributes,
-          symbol: symbol
-        })
+  // function zoomToOffice (office: string) {
+  //   const OfficeLayerUrl = config.queryLayers.officeLayer
+  //   const OfficeLayer = new FeatureLayer({ url: OfficeLayerUrl })
 
-        if (graphicLayerRef.current) {
-          graphicLayerRef.current.removeAll()
-          graphicLayerRef.current.add(graphic)
-        } else {
-          console.error('Graphics layer not initialized.')
-        }
-        if (sjmv) {
-          sjmv.view.goTo({
-            target: result.features[0]
-          }).catch(function (error) {
-            console.log('Error querying feature service.')
-          })
-        }
-      }
-    })
-  }
+  //   console.log(config)
+  //   let query
+  //   query = OfficeLayer.createQuery()
+  //   query.where = `ADMU_NAME = '${office}'`
+  //   query.returnGeometry = true
+  //   query.outFields = ['*']
 
-  function queryOffice () {
-    const OfficeLayerUrl = config.queryLayers.officeLayer
-    const OfficeLayer = new FeatureLayer({ url: OfficeLayerUrl })
+  //   OfficeLayer.queryFeatures(query).then(function (result) {
+  //     if (result.features.length > 0) {
+  //       const features = result.features[0]
+  //       const symbol = {
+  //         type: 'simple-fill', // autocasts as new SimpleFillSymbol()
+  //         color: [0, 204, 255, 0.4],
+  //         style: 'solid',
+  //         outline: {
+  //           color: [0, 204, 255, 0.8],
+  //           width: 2
+  //         }
+  //       }
 
-    console.log(config)
-    let query
-    query = OfficeLayer.createQuery()
-    query.where = `ADMIN_ST = '${stateSel}'`
-    query.returnGeometry = true
-    query.outFields = ['*']
+  //       const graphic = new Graphic({
+  //         geometry: features.geometry,
+  //         attributes: features.attributes,
+  //         symbol: symbol
+  //       })
 
-    OfficeLayer.queryFeatures(query).then(function (result) {
-      if (result.features.length > 0) {
-        console.log(result.features)
-        const features = result.features
-        console.log(features)
-        setOfficeOptions(features)
-      }
-    })
-  }
+  //       if (graphicLayerRef.current) {
+  //         graphicLayerRef.current.removeAll()
+  //         graphicLayerRef.current.add(graphic)
+  //       } else {
+  //         console.error('Graphics layer not initialized.')
+  //       }
+  //       if (sjmv) {
+  //         sjmv.view.goTo({
+  //           target: result.features[0]
+  //         }).catch(function (error) {
+  //           console.log('Error querying feature service.')
+  //         })
+  //       }
+  //     }
+  //   })
+  // }
 
-  function queryDistrict () {
-    const DistrictLayerUrl = config.queryLayers.districtLayer
-    const DistrictLayer = new FeatureLayer({ url: DistrictLayerUrl })
+  // function queryOffice () {
+  //   const OfficeLayerUrl = config.queryLayers.officeLayer
+  //   const OfficeLayer = new FeatureLayer({ url: OfficeLayerUrl })
 
-    console.log(config)
-    let query
-    query = DistrictLayer.createQuery()
-    query.where = `ADMIN_ST = '${stateSel}'`
-    query.returnGeometry = true
-    query.outFields = ['*']
+  //   console.log(config)
+  //   let query
+  //   query = OfficeLayer.createQuery()
+  //   query.where = `ADMIN_ST = '${stateSel}'`
+  //   query.returnGeometry = true
+  //   query.outFields = ['*']
 
-    DistrictLayer.queryFeatures(query).then(function (result) {
-      if (result.features.length > 0) {
-        console.log(result.features)
-        const features = result.features
-        console.log(features)
-        setDistrictOptions(features)
-      }
-    })
-  }
+  //   OfficeLayer.queryFeatures(query).then(function (result) {
+  //     if (result.features.length > 0) {
+  //       console.log(result.features)
+  //       const features = result.features
+  //       console.log(features)
+  //       setOfficeOptions(features)
+  //     }
+  //   })
+  // }
 
-  useEffect(() => {
-    const stateLayerUrl = config.queryLayers.stateLayer
-    const stateLayer = new FeatureLayer({ url: stateLayerUrl })
+  // function queryDistrict () {
+  //   const DistrictLayerUrl = config.queryLayers.districtLayer
+  //   const DistrictLayer = new FeatureLayer({ url: DistrictLayerUrl })
 
-    console.log(config)
-    let query
-    query = stateLayer.createQuery()
-    query.where = `ADMIN_ST = '${stateSel}'`
-    query.returnGeometry = true
-    query.outFields = ['*']
+  //   console.log(config)
+  //   let query
+  //   query = DistrictLayer.createQuery()
+  //   query.where = `ADMIN_ST = '${stateSel}'`
+  //   query.returnGeometry = true
+  //   query.outFields = ['*']
 
-    stateLayer.queryFeatures(query).then(function (result) {
-      if (result.features.length > 0) {
-        console.log(result.features)
-        const features = result.features[0]
-        const symbol = {
-          type: 'simple-fill', // autocasts as new SimpleFillSymbol()
-          color: [0, 204, 255, 0.4],
-          style: 'solid',
-          outline: {
-            color: [0, 204, 255, 0.8],
-            width: 2
-          }
-        }
+  //   DistrictLayer.queryFeatures(query).then(function (result) {
+  //     if (result.features.length > 0) {
+  //       console.log(result.features)
+  //       const features = result.features
+  //       console.log(features)
+  //       setDistrictOptions(features)
+  //     }
+  //   })
+  // }
 
-        const graphic = new Graphic({
-          geometry: features.geometry,
-          attributes: features.attributes,
-          symbol: symbol
-        })
+  // useEffect(() => {
+  //   const stateLayerUrl = config.queryLayers.stateLayer
+  //   const stateLayer = new FeatureLayer({ url: stateLayerUrl })
 
-        if (graphicLayerRef.current) {
-          graphicLayerRef.current.removeAll()
-          graphicLayerRef.current.add(graphic)
-        } else {
-          console.error('Graphics layer not initialized.')
-        }
-        // features.attributes.EMAIL_ID = 'Derek Test'
-        // if (sjmv) {
-        sjmv.view.goTo({
-          target: result.features[0]
-          // zoom: 16
-        }).catch(function (error) {
-          console.log('Error querying feature service.')
-        })
-      }
-    })
-    queryDistrict()
-    queryOffice()
-  }, [stateSel])
+  //   console.log(config)
+  //   let query
+  //   query = stateLayer.createQuery()
+  //   query.where = `ADMIN_ST = '${stateSel}'`
+  //   query.returnGeometry = true
+  //   query.outFields = ['*']
 
-  const handleStateChange = (event) => {
-    handleStateSel(event.target.value)
-    console.log(stateSel)
-  }
+  //   stateLayer.queryFeatures(query).then(function (result) {
+  //     if (result.features.length > 0) {
+  //       console.log(result.features)
+  //       const features = result.features[0]
+  //       const symbol = {
+  //         type: 'simple-fill', // autocasts as new SimpleFillSymbol()
+  //         color: [0, 204, 255, 0.4],
+  //         style: 'solid',
+  //         outline: {
+  //           color: [0, 204, 255, 0.8],
+  //           width: 2
+  //         }
+  //       }
 
-  const handleDistrictOfficeChange = (event) => {
-    const district = event.target.value
-    handleDistrictOffice(event.target.value)
-    zoomToDistrict(district)
-    // queryOffice()
+  //       const graphic = new Graphic({
+  //         geometry: features.geometry,
+  //         attributes: features.attributes,
+  //         symbol: symbol
+  //       })
 
-    console.log(districtOffice)
-  }
+  //       if (graphicLayerRef.current) {
+  //         graphicLayerRef.current.removeAll()
+  //         graphicLayerRef.current.add(graphic)
+  //       } else {
+  //         console.error('Graphics layer not initialized.')
+  //       }
+  //       // features.attributes.EMAIL_ID = 'Derek Test'
+  //       // if (sjmv) {
+  //       sjmv.view.goTo({
+  //         target: result.features[0]
+  //         // zoom: 16
+  //       }).catch(function (error) {
+  //         console.log('Error querying feature service.')
+  //       })
+  //     }
+  //   })
+  //   queryDistrict()
+  //   queryOffice()
+  // }, [stateSel])
 
-  const handleFieldOfficeChange = (event) => {
-    const office = event.target.value
-    handleFieldOffice(office)
-    zoomToOffice(office)
-    console.log(fieldOffice)
-  }
+  // const handleStateChange = (event) => {
+  //   handleStateSel(event.target.value)
+  //   console.log(stateSel)
+  // }
+
+  // const handleDistrictOfficeChange = (event) => {
+  //   const district = event.target.value
+  //   handleDistrictOffice(event.target.value)
+  //   zoomToDistrict(district)
+  //   // queryOffice()
+
+  //   console.log(districtOffice)
+  // }
+
+  // const handleFieldOfficeChange = (event) => {
+  //   const office = event.target.value
+  //   handleFieldOffice(office)
+  //   zoomToOffice(office)
+  //   console.log(fieldOffice)
+  // }
 
   return (
 <div>
+
     <div className='d-flex justify-content-center'>
     </div>
     <div style={{
@@ -261,7 +256,7 @@ const Main = ({ success, failure, sjmv }) => {
               direction="down"
               placeholder="Select a state..."
               style={{ width: '150px' }}
-              onChange={handleStateChange}
+              onChange={sharedState.handleStateChange}
             >
               <Option value="AZ">
                 Arizona
@@ -303,10 +298,10 @@ const Main = ({ success, failure, sjmv }) => {
           <Select
             direction="down"
             placeholder="Select a destination..."
-            onChange={handleDistrictOfficeChange}
+            onChange={sharedState.handleDistrictOfficeChange}
           >
             <Option value={'Select a Distric'}>Select a District...</Option>
-           {districtOptions?.map(district =>
+           {sharedState.districtOptions?.map(district =>
             <Option
             value={district.attributes.PARENT_NAME}>
                 {district.attributes.PARENT_NAME}
@@ -321,12 +316,12 @@ const Main = ({ success, failure, sjmv }) => {
           <Select
             direction="down"
             placeholder="Select a destination..."
-            onChange={handleFieldOfficeChange}
+            onChange={sharedState.handleFieldOfficeChange}
           >
              <Option value={'Select a Office'}>Select a Office...</Option>
-           {officeOptions?.map(district =>
+           {sharedState.officeOptions?.map(district =>
             <Option
-            value={district.attributes.ADMU_NAME}>
+            value={district.attributes.PARENT_CD}>
                 {district.attributes.ADMU_NAME}
             </Option>
            )}
@@ -341,15 +336,15 @@ const Main = ({ success, failure, sjmv }) => {
       <Button
         aria-pressed="false"
         type="primary"
-        disabled={!inputValidation}
-        onClick={runQuery}
+        disabled={!sharedState.inputValidation}
+        onClick={sharedState.runQuery}
       >
         Search
       </Button>
-      <Button type="primary" disabled={!inputValidation} onClick={handleRefresh}>
+      <Button type="primary" disabled={!sharedState.inputValidation} onClick={sharedState.handleRefresh}>
         Refresh
       </Button>
-      <Button type="primary" disabled={!inputValidation} onClick={handleCancel}>
+      <Button type="primary" disabled={!sharedState.inputValidation} onClick={sharedState.handleCancel}>
        Cancel
       </Button>
     </ButtonGroup>
