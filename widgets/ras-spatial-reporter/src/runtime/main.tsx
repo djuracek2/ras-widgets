@@ -11,7 +11,6 @@ import Graphic from '@arcgis/core/Graphic'
 
 
 const Main = ({ sharedState }) => {
-
   // const [inputValidation, setInputValidation] = useState(false)
   // const [stateSel, handleStateSel] = useState('')
   // const [districtOffice, handleDistrictOffice] = useState('')
@@ -321,7 +320,7 @@ const Main = ({ sharedState }) => {
              <Option value={'Select a Office'}>Select a Office...</Option>
            {sharedState.officeOptions?.map(district =>
             <Option
-            value={district.attributes.PARENT_CD}>
+            value={district.attributes.ADMIN_ST + '-' + district.attributes.ADMU_NAME}>
                 {district.attributes.ADMU_NAME}
             </Option>
            )}

@@ -1,9 +1,11 @@
-import { React, type AllWidgetProps } from "jimu-core";
+import { React, type AllWidgetProps } from 'jimu-core'
 import { useState, useEffect, useRef } from 'react'
-import { Checkbox, Label, Switch, TextInput, Button, ButtonGroup, Select, Option, CollapsablePanel, Radio } from "jimu-ui";
+import { Checkbox, Label, Switch, TextInput, Button, ButtonGroup, Select, Option, CollapsablePanel, Radio } from 'jimu-ui'
 import { DatePicker } from 'jimu-ui/basic/date-picker'
+import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
+import config from '../configs/config.json'
 
-const Authorizations = (styles) => {
+const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBilled, sharedState, styles, qryReportViewAuthAllotmentString, setQueryDates, setQueryAuthLiveStockString, setQueryStringAuthorizationAuth }) => {
   const [burro, setBurro] = useState(false)
   const [cattle, setCattle] = useState(false)
   const [goat, setGoat] = useState(false)
@@ -14,35 +16,29 @@ const Authorizations = (styles) => {
   const [_402, set402] = useState(false)
   const [fullyPro, setfullyPro] = useState(false)
   const [decStayed, setDecStayed] = useState(false)
-
-  const [effBegin, setEffBegin] = useState<Date | null>(new Date("2022-07-30T06:00:00.000Z"))
-  const [effEnd, setEffEnd] = useState<Date | null>(new Date())
-  const [expBegin, setExpBegin] = useState<Date | null>(new Date("2022-07-30T06:00:00.000Z"))
-  const [expEnd, setExpEnd] = useState<Date | null>(new Date())
+  const [effBegin, setEffBegin] = useState()
+  const [effEnd, setEffEnd] = useState()
+  const [expBegin, setExpBegin] = useState()
+  const [expEnd, setExpEnd] = useState()
   const [issBegin, setIssBegin] = useState('')
   const [issEnd, setIssEnd] = useState('')
-
-  const [queryStringAuthorizationAuth, setQueryStringAuthorizationAuth] = useState('')
-  const [authOutString, setAuthOutString] = useState('')
-  const [AuthDates, setAuthDates] = useState('')
-
 
   function handleEffectiveDate (type, val) {
     if (type === 'begin') {
       // might need to change these to formattedBegData for query on feature service?
       // or add another state?
-      let effectiveBegin = new Date(val)
-      effectiveBegin.setDate(effectiveBegin.getDate() + 1)
-      let formattedBegDate = effectiveBegin.toISOString().split('T')[0]
+      // const effectiveBegin = new Date(val)
+      // effectiveBegin.setDate(effectiveBegin.getDate() + 1)
+      // const formattedBegDate = effectiveBegin.toISOString().split('T')[0]
       setEffBegin(val)
-      console.log(formattedBegDate)
+      // console.log(formattedBegDate)
     } else {
       // here too
-      let effectiveEnd = new Date(val)
-      effectiveEnd.setDate(effectiveEnd.getDate() + 1)
-      let formattedEndDate = effectiveEnd.toISOString().split('T')[0]
+      // const effectiveEnd = new Date(val)
+      // effectiveEnd.setDate(effectiveEnd.getDate() + 1)
+      // const formattedEndDate = effectiveEnd.toISOString().split('T')[0]
       setEffEnd(val)
-      console.log(formattedEndDate)
+      // console.log(formattedEndDate)
     }
   }
 
@@ -65,7 +61,6 @@ const Authorizations = (styles) => {
       console.log(issEnd)
     }
   }
-
 
   function handleCheckBoxChange (checkboxid, checked) {
     console.log(checkboxid, checked)
@@ -92,66 +87,82 @@ const Authorizations = (styles) => {
     }
   }
 
-  useEffect(() => {
+  function getAuthLiveStockQuery () {
     let outString = ''
     if (burro) {
       outString = " ( LIVESTOCK_KIND_NM = 'B - BURRO'"
     }
 
     if (cattle) {
-      if (outString === "") {
-        outString = " ( LIVESTOCK_KIND_NM = 'C - CATTLE'";
+      if (outString === '') {
+        outString = " ( LIVESTOCK_KIND_NM = 'C - CATTLE'"
       } else {
-        outString = outString + " OR " + " LIVESTOCK_KIND_NM = 'C - CATTLE'";
+        outString = outString + ' OR ' + " LIVESTOCK_KIND_NM = 'C - CATTLE'"
       }
     }
 
     if (goat) {
-      if (outString === "") {
-        outString = " ( LIVESTOCK_KIND_NM = 'G - GOAT'";
+      if (outString === '') {
+        outString = " ( LIVESTOCK_KIND_NM = 'G - GOAT'"
       } else {
-        outString = outString + " OR " + "LIVESTOCK_KIND_NM = 'G - GOAT'";
+        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'G - GOAT'"
       }
     }
 
     if (sheep) {
-      if (outString === "") {
-        outString = " ( LIVESTOCK_KIND_NM = 'S - SHEEP'";
+      if (outString === '') {
+        outString = " ( LIVESTOCK_KIND_NM = 'S - SHEEP'"
       } else {
-        outString = outString + " OR " + "LIVESTOCK_KIND_NM = 'S - SHEEP'";
+        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'S - SHEEP'"
       }
     }
 
     if (horse) {
-      if (outString === "") {
-        outString = " ( LIVESTOCK_KIND_NM = 'H - HORSE'";
+      if (outString === '') {
+        outString = " ( LIVESTOCK_KIND_NM = 'H - HORSE'"
       } else {
-        outString = outString + " OR " + "LIVESTOCK_KIND_NM = 'H - HORSE'";
+        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'H - HORSE'"
       }
     }
 
     if (yCattle) {
-      if (outString === "") {
-        outString = " ( LIVESTOCK_KIND_NM = 'Y - YRLING CATTLE'";
+      if (outString === '') {
+        outString = " ( LIVESTOCK_KIND_NM = 'Y - YRLING CATTLE'"
       } else {
-        outString = outString + " OR " + "LIVESTOCK_KIND_NM = 'Y - YRLING CATTLE'";
+        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'Y - YRLING CATTLE'"
       }
     }
 
     if (ind) {
       if (outString === '') {
-        outString = "( LIVESTOCK_KIND_NM = 'I - INDIGENOUS'";
+        outString = "( LIVESTOCK_KIND_NM = 'I - INDIGENOUS'"
       } else {
-        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'I - INDIGENOUS'";
+        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'I - INDIGENOUS'"
       }
     }
 
-    if (outString !== '') { outString = outString + " ) "}
-    setAuthOutString(outString)
+    if (outString !== '') { outString = outString + ' ) ' }
+    setQueryAuthLiveStockString(outString)
     console.log('1st part of query string is:', outString)
-  }, [burro, goat, ind, sheep, cattle, horse, yCattle])
+  }
 
   useEffect(() => {
+    if (sharedState.isSearching) {
+      getAuthLiveStockQuery()
+      getAuthAuthorityQuery()
+      setNoDatesTrigger('2')
+      // getAuthorityDatesQuery()
+    }
+  }, [sharedState.isSearching])
+
+  useEffect(() => {
+    if (qryReportViewAuthAllotmentString !== '') {
+      console.log(qryReportViewAuthAllotmentString)
+      queryAuthAuthority(qryReportViewAuthAllotmentString)
+    }
+  }, [qryReportViewAuthAllotmentString])
+
+  function getAuthAuthorityQuery () {
     let queryStringAuthorizationAuth = ''
 
     if (_402) {
@@ -161,49 +172,79 @@ const Authorizations = (styles) => {
     }
 
     if (fullyPro) {
-      if (queryStringAuthorizationAuth === "") {
-        queryStringAuthorizationAuth = " ( AUTH_AUTHORITY_CD = 'F'";
+      if (queryStringAuthorizationAuth === '') {
+        queryStringAuthorizationAuth = " ( AUTH_AUTHORITY_CD = 'F'"
       } else {
-        queryStringAuthorizationAuth = queryStringAuthorizationAuth + " OR " + "AUTH_AUTHORITY_CD = 'F'";
+        queryStringAuthorizationAuth = queryStringAuthorizationAuth + ' OR ' + "AUTH_AUTHORITY_CD = 'F'"
       }
     }
     if (decStayed) {
-      if (queryStringAuthorizationAuth === "") {
-        queryStringAuthorizationAuth = " ( AUTH_AUTHORITY_CD = 'A'";
+      if (queryStringAuthorizationAuth === '') {
+        queryStringAuthorizationAuth = " ( AUTH_AUTHORITY_CD = 'A'"
       } else {
-        queryStringAuthorizationAuth = queryStringAuthorizationAuth + " OR " + "AUTH_AUTHORITY_CD = 'A'";
+        queryStringAuthorizationAuth = queryStringAuthorizationAuth + ' OR ' + "AUTH_AUTHORITY_CD = 'A'"
       }
     }
-    if (queryStringAuthorizationAuth !== "") {
-      queryStringAuthorizationAuth = queryStringAuthorizationAuth + " ) "
+    if (queryStringAuthorizationAuth !== '') {
+      queryStringAuthorizationAuth = queryStringAuthorizationAuth + ' ) '
     }
     setQueryStringAuthorizationAuth(queryStringAuthorizationAuth)
     console.log('2nd part of query string is:', queryStringAuthorizationAuth)
-  }, [_402, fullyPro, decStayed])
+  }
 
-  useEffect(() => {
-    let queryDates = ""
+  function getAuthorityDatesQuery () {
+    let queryDates = ''
     // Not adding issue mng for now as its coded out
     // check if still needed in ui
-    if ((effBegin !== '') && (effEnd !== '')) {
-      queryDates = " (AUTH_EFT_DT >= '" + effBegin + "' AND AUTH_EFT_DT <= '" + effEnd + "') ";
+    if (effBegin !== '' && effEnd !== '') {
+      queryDates = " (AUTH_EFT_DT >= '" + effBegin + "' AND AUTH_EFT_DT <= '" + effEnd + "') "
     }
-    if (expBegin !== "" && expEnd !== "") {
-      if (queryDates === "") {
-        queryDates = " (AUTH_EXP_DT >= '" + expBegin + "' AND AUTH_EXP_DT <= '" + expEnd + "') ";
+
+    //DONT SEE THESE FIELDS IN CODE!!!
+    if (expBegin !== '' && expEnd !== '') {
+      if (queryDates === '') {
+        queryDates = " (AUTH_EXP_DT >= '" + expBegin + "' AND AUTH_EXP_DT <= '" + expEnd + "') "
       } else {
-        queryDates = queryDates + " AND " + " ( AUTH_EXP_DT >= '" + expBegin + "' AND AUTH_EXP_DT <= '" + expEnd + "' )"
+        queryDates = queryDates + ' AND ' + " ( AUTH_EXP_DT >= '" + expBegin + "' AND AUTH_EXP_DT <= '" + expEnd + "' )"
       }
     }
-    setAuthDates(queryDates)
+    setQueryDates(queryDates)
+   
     console.log('3rd part of query string is:', queryDates)
-  }, [effBegin, effEnd, expBegin, expEnd])
+  }
+
+  function queryAuthAuthority (qryReportViewAuthAllotmentString: string) {
+    const RasAuthAllot = config.queryLayers.RasReportAuthAllotmentVW
+    const RasAuthLayer = new FeatureLayer({ url: RasAuthAllot })
+    console.log(RasAuthLayer)
+
+    console.log(config)
+    let query
+    query = RasAuthLayer.createQuery()
+    query.where = qryReportViewAuthAllotmentString
+    query.returnGeometry = false
+    query.outFields = ["ST_ALLOT_NR"]
+    if (qryReportViewAuthAllotmentString !== '') {
+      RasAuthLayer.queryFeatures(query).then(function (result) {
+        if (result) {
+          console.log(result.features)
+          const features = result.features
+          console.log(features)
+          setFeaturesForBilled(features)
+        }
+      })
+    } else {
+      setFeaturesForBilled('')
+    }
+    sharedState.setIsSearching(false)
+    setStartBilled(true)
+  }
 
   return (
     <>
        <CollapsablePanel
             label="Authorizations"
-            
+
             level={0}
             type="default"
             style={{
@@ -216,7 +257,7 @@ const Authorizations = (styles) => {
               }}
             >
               <label>Livestock Kind:</label>
-              <div style={styles.styles.container}>
+              <div style={styles.container}>
               <Label
                   centric
                   check
@@ -260,7 +301,7 @@ const Authorizations = (styles) => {
                 GOAT
                 </Label>
               </div>
-              <div style={styles.styles.container}>
+              <div style={styles.container}>
                 <Label
                   centric
                   check
@@ -342,7 +383,7 @@ const Authorizations = (styles) => {
                 FLPMA 402(c)(2) APPROP ACT
                 </Label>
                 </div>
-                <div style={styles.styles.container}>
+                <div style={styles.container}>
                 <Label
                   centric
                   check
@@ -374,19 +415,19 @@ const Authorizations = (styles) => {
                 </div>
                 <div>
                 <Label>Effective Date:</Label>
-                    <div style={ styles.styles.datetime}>
-              
+                    <div style={ styles.datetime}>
+
                     <div
                       style={{
                         width: 200
                       }}
 
                     >
-                 
+
                       <DatePicker
                         aria-describedby="date-picker-desc-id"
                         aria-label="DateTime picker label"
-                        format="shortDateLongTime"
+                        format="MM/dd/yyyy"
                         onChange={(val) => { handleEffectiveDate('begin', val) }}
                         selectedDate={effBegin}
                         strategy="absolute"
@@ -395,7 +436,7 @@ const Authorizations = (styles) => {
                           'YESTERDAY'
                         ]}
                       />
-               
+
                       <div
                         id="date-picker-desc-id"
                         style={{
@@ -405,7 +446,7 @@ const Authorizations = (styles) => {
                         This is desc
                       </div>
                     </div>
-              
+
                     <Label style={{ display: 'flex', alignItems: 'center', padding: '5px', paddingTop: '10px' }}>between:</Label>
                   <div
                         style={{
@@ -415,7 +456,7 @@ const Authorizations = (styles) => {
                         <DatePicker
                           aria-describedby="date-picker-desc-id"
                           aria-label="DateTime picker label"
-                          format="shortDateLongTime"
+                          format="MM/dd/yyyy"
                           onChange={(val) => { handleEffectiveDate('end', val) }}
                           selectedDate={effEnd}
                           strategy="absolute"
@@ -430,7 +471,7 @@ const Authorizations = (styles) => {
                 </div>
                 <div>
                 <Label>Expiration Date:</Label>
-                    <div style={ styles.styles.datetime}>
+                    <div style={ styles.datetime}>
                     <div
                       style={{
                         width: 200
@@ -439,7 +480,7 @@ const Authorizations = (styles) => {
                       <DatePicker
                         aria-describedby="date-picker-desc-id"
                         aria-label="DateTime picker label"
-                        format="shortDateLongTime"
+                        format="MM/dd/yyyy"
                         selectedDate={expBegin}
                         onChange={(val) => { handleExpirationDate('begin', val) }}
                         strategy="absolute"
@@ -459,7 +500,7 @@ const Authorizations = (styles) => {
                         <DatePicker
                           aria-describedby="date-picker-desc-id"
                           aria-label="DateTime picker label"
-                          format="shortDateLongTime"
+                          format="MM/dd/yyyy"
                           selectedDate={expEnd}
                           onChange={(val) => { handleExpirationDate('end', val) }}
                           strategy="absolute"
@@ -475,7 +516,7 @@ const Authorizations = (styles) => {
 
                 {/* <div>
                 <Label>Issue/Mgr. Signature Date::</Label>
-                    <div style={ styles.styles.datetime}>
+                    <div style={ styles.datetime}>
                     <div
                       style={{
                         width: 150
@@ -523,4 +564,4 @@ const Authorizations = (styles) => {
   )
 }
 
-export default Authorizations;
+export default Authorizations

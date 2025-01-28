@@ -22,6 +22,7 @@ import Inspections from "./inspections";
 import Footer from "./footer"
 import Header from "./header";
 import config from '../configs/config.json'
+import QueryAll from "./queryall";
 import { FixedAnimationSetting } from "dist/widgets/common/controller/src/setting/fixed-layout-setting/animation-setting";
 
  const Widget = (props: AllWidgetProps<IMConfig>) => {
@@ -34,6 +35,7 @@ import { FixedAnimationSetting } from "dist/widgets/common/controller/src/settin
   const [stateSel, handleStateSel] = useState('')
   const [districtOffice, handleDistrictOffice] = useState('')
   const [fieldOffice, handleFieldOffice] = useState('')
+  const [stateOfficeQuery, setStateOfficeQuery] = useState('')
  
   const [districtOptions, setDistrictOptions] = useState([])
   const [officeOptions, setOfficeOptions] = useState([])
@@ -44,12 +46,12 @@ import { FixedAnimationSetting } from "dist/widgets/common/controller/src/settin
   const [defExpression, setDefExpression] = useState('')
   const [allotment, setAllotmentNumber] = useState('')
   const [officeId, setOfficeId] = useState('')
-
   const [inputValidation, setInputValidation] = useState(true)
 
   const [viewReady, setViewReady] = useState(false)
   const featureLayerRef = useRef<FeatureLayer>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isSearching, setIsSearching] = useState(false)
 
   useEffect(() => {
     if (sjmv && !graphicLayerRef.current) {
@@ -104,7 +106,11 @@ import { FixedAnimationSetting } from "dist/widgets/common/controller/src/settin
     handleCancel,
     handleRefresh,
     inputValidation,
-    setInputValidation
+    setInputValidation,
+    stateOfficeQuery,
+    onSearch,
+    isSearching,
+    setIsSearching
   }
 
   const [formData, setFormData] = useState({
@@ -291,6 +297,24 @@ import { FixedAnimationSetting } from "dist/widgets/common/controller/src/settin
     })
   }
 
+  function onSearch () {
+    getStateOfficeQuery()
+    setIsSearching(true)
+  }
+
+  function getStateOfficeQuery () {
+ //regional query
+ let state_officeQuery = "";
+    if (stateSel !== "Select State" ) {
+        state_officeQuery = " ( ST_ALLOT_NR LIKE '" + stateSel + "%' )"
+    }
+    if (fieldOffice !== "0" && fieldOffice !== "" ) {
+        state_officeQuery = state_officeQuery + " And ( ADMIN_OFC_CD = '" + fieldOffice + "' )"
+    }
+    setStateOfficeQuery(state_officeQuery)
+    console.log(state_officeQuery)
+  }
+
   function queryDistrict () {
     const DistrictLayerUrl = config.queryLayers.districtLayer
     const DistrictLayer = new FeatureLayer({ url: DistrictLayerUrl })
@@ -431,12 +455,10 @@ const handleChange = (changes) => {
             width: '90%'
           }}
         >
-          <Allotments styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></Allotments>
-          <Authorizations styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></Authorizations>
-          <BilledUse styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></BilledUse>
-          <Inspections styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></Inspections>
-          <Footer sharedState={sharedState}></Footer>
+          <QueryAll sharedState={sharedState} styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}>
+          </QueryAll>
         </div>
+        <Footer sharedState={sharedState}></Footer>
     </div>
   )
 }

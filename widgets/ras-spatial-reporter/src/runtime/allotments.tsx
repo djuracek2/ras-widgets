@@ -6,7 +6,7 @@ import { TableArrangeType } from 'dist/widgets/common/table/src/config'
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
 import config from '../configs/config.json'
 
-const Allotments = ({ styles, stateSel, districtOffice, office }) => {
+const Allotments = ({ styles, stateSel, districtOffice, office, setQuery }) => {
   const [allotmentValue, setAllotmentValue] = useState('')
   const [allotGroupValue, setAllotGroupValue] = useState('')
   const [allotAccept, setAllotAccept] = useState(false)
@@ -68,6 +68,8 @@ const Allotments = ({ styles, stateSel, districtOffice, office }) => {
     // populate allotments & group on office change
   }, [office])
 
+
+
   useEffect(() => {
     let outQueryStringAllotmentApp = ''
     //check for approval flags
@@ -83,7 +85,7 @@ const Allotments = ({ styles, stateSel, districtOffice, office }) => {
       }
     }
     setOutQueryStringAllotment(outQueryStringAllotmentApp)
-  })
+  }, [allotAccept, allotReject])
 
   function handleAllotmentSelect (event) {
     setAllotmentValue(event.target.value)

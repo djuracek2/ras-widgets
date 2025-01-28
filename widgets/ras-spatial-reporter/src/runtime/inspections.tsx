@@ -1,12 +1,12 @@
-import { React, type AllWidgetProps } from "jimu-core"
+import { React, type AllWidgetProps } from 'jimu-core'
 import { useState } from 'react'
-import { Label, CollapsablePanel, Radio } from "jimu-ui"
+import { Label, CollapsablePanel, Radio } from 'jimu-ui'
 import { DatePicker } from 'jimu-ui/basic/date-picker'
 
 const Inspections = (styles) => {
   const [yes, setYes] = useState(false)
   const [no, setNo] = useState(false)
-  const [beginTime, setBeginTime] = useState<Date | null>(new Date("2022-07-30T06:00:00.000Z"))
+  const [beginTime, setBeginTime] = useState<Date | null>(new Date('2022-07-30T06:00:00.000Z'))
   const [endTime, setEndTime] = useState<Date | null>(new Date())
 
   function handleTime (type, val) {
@@ -27,11 +27,48 @@ const Inspections = (styles) => {
     }
     console.log(yes, no)
   }
+
+  // get date values
+  function getQueryComplianceDate () {
+    if ((beginTime !== '') && (endTime !== '')) {
+      return " ( INSPECTION_DT >= '" + beginTime + "' AND INSPECTION_DT <= '" + endTime + "' ) "
+    }
+  }
+  let allComplainceQuery = getQueryComplianceDate()
+  let queryStringCompYesNo = ''
+  if (yes) {
+    queryStringCompYesNo = "( OOC_CD = 'Y' "
+    if (allComplainceQuery !== '' && allComplainceQuery !== undefined) {
+      allComplainceQuery = allComplainceQuery + ' AND ' + queryStringCompYesNo + ' )'
+    } else {
+      allComplainceQuery = queryStringCompYesNo + ' ) '
+    }
+  }
+  if (no) {
+    queryStringCompYesNo = " ( OOC_CD = 'N' "
+    if (allComplainceQuery !== '' && allComplainceQuery !== undefined) {
+      allComplainceQuery = allComplainceQuery + ' AND ' + queryStringCompYesNo + ' ) '
+    } else {
+      allComplainceQuery = queryStringCompYesNo
+    }
+  }
+// queryAuthAndBillString looks like this comes from billed use query
+// it passes the results into this query and if its not == '' 
+// then it adds to the query
+var queryAuthAndBillString
+  if (allComplainceQuery !== '' && queryAuthAndBillString !== '' && allComplainceQuery !== undefined) {
+    allComplainceQuery = allComplainceQuery + ' AND ' + queryAuthAndBillString
+  } else {
+    if (queryAuthAndBillString != '') {
+      allComplainceQuery = queryAuthAndBillString
+    }
+  }
+
   return (
     <>
 <CollapsablePanel
             label="Inspections"
-            defaultIsOpen="true"
+            // defaultIsOpen="true"
             level={0}
             type="default"
             style={{

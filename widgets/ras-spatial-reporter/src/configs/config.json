@@ -4,22 +4,21 @@
     "allotmentTableUrl": "    https://gis.dev.blm.doi.net/arcgisauthpub/rest/services/RAS_locked/BLM_Natl_RAS_Approvals/FeatureServer/0",
     "pastureTableUrl": "https://gis.dev.blm.doi.net/arcgisauth/rest/services/RAS_locked/BLM_Natl_RAS_Approvals/FeatureServer/2"
 
-
   },
   "queryLayers": {
     "stateLayer": "https://gis.blm.gov/arcgis/rest/services/admin_boundaries/BLM_Natl_AdminUnit/MapServer/1",
     "districtLayer": "https://gis.blm.gov/arcgis/rest/services/admin_boundaries/BLM_Natl_AdminUnit/MapServer/2",
     "officeLayer": "https://gis.blm.gov/arcgis/rest/services/admin_boundaries/BLM_Natl_AdminUnit/MapServer/3",
     "allotmentPolyLayer": "https://gis.dev.blm.doi.net/arcgisauth/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/0",
-    "authDetailsTable": "https://gis.test.blm.doi.net/arcgisauth/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/1",
+    "authDetailsTable": "https://gis.dev.blm.doi.net/arcgisauth/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/1",
     "authUseTable": "https://gis.dev.blm.doi.net/arcgisauth/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/2",
-    "grazingScheduleTable": "https://gis.test.blm.doi.net/arcgisauth/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/3",
-    "inspectionUseTable": "https://gis.test.blm.doi.net/arcgisauth/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/4",
-    "plannedUseTable": "https://gis.test.blm.doi.net/arcgisauth/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/5",
+    "grazingScheduleTable": "https://gis.dev.blm.doi.net/arcgisauth/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/3",
+    "inspectionUseTable": "https://gis.dev.blm.doi.net/arcgisauth/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/4",
+    "plannedUseTable": "https://gis.dev.blm.doi.net/arcgisauth/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/5",
     "approvalAllotmentTable": "https://gis.dev.blm.doi.net/arcgisauth/rest/services/RAS_locked/BLM_Natl_RAS_Approvals/MapServer/1",
     "allotmentGroupTable": "https://gis.dev.blm.doi.net/arcgisauthpub/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/6",
-    "RasReportBillUsedVW": "https://gis.test.blm.doi.net/arcgisauthpub/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/7",
-    "RasReportAuthAllotmentVW": "https://gis.test.blm.doi.net/arcgisauthpub/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/6"
+    "RasReportBillUsedVW": "https://gis.dev.blm.doi.net/arcgisauthpub/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/8",
+    "RasReportAuthAllotmentVW": "https://gis.dev.blm.doi.net/arcgisauthpub/rest/services/RAS_locked/BLM_Natl_RAS_Report/MapServer/7"
   },
   "rasServiceLayers": {
     "allotmentLayer": "https://gis.blm.doi.net/arcgis/rest/services/range/BLM_Natl_Grazing_Allot/MapServer/12",

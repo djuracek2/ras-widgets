@@ -2,9 +2,10 @@ import { React, type AllWidgetProps } from 'jimu-core'
 import { useState, useEffect } from 'react'
 import { Checkbox, Label, Select, Option, CollapsablePanel } from 'jimu-ui'
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
+import SpatialReference from '@arcgis/core/geometry/SpatialReference'
 import config from '../configs/config.json'
 
-const BilledUse = (styles) => {
+const BilledUse = ({ styles, startBilled, featuresForBilled }) => {
   const [burro, setBurro] = useState(false)
   const [cattle, setCattle] = useState(false)
   const [goat, setGoat] = useState(false)
@@ -17,6 +18,7 @@ const BilledUse = (styles) => {
   const [billYearOptions, setBillYearOptions] = useState([])
   const [billScheduleOptions, setBillScheduleOptions] = useState([])
   const [billedUseString, setBilledUseString] = useState('')
+  const [billedUseFinalQuery, setBilledUseFinalQuery] = useState('')
 
   function handleGrazingYear (event) {
     setGrazingYear(event.target.value)
@@ -79,6 +81,83 @@ const BilledUse = (styles) => {
     })
   }
 
+  function queryAllBillUsedRecords () {
+    const features = featuresForBilled
+    let queryAuthString
+    if (features !== undefined) {
+      if (features.length > 0) {
+        const resultAuthFeatures = features
+        queryAuthString = 'ST_ALLOT_NR in ('
+
+        let rowResult
+
+        resultAuthFeatures.forEach((feature) => {
+          queryAuthString += "'" + feature.attributes.ST_ALLOT_NR + "',"
+        })
+
+        //remove the last comma
+        queryAuthString = queryAuthString.substring(0, queryAuthString.length - 1) + ')'
+      }
+      let billUseAllQuery = getAllBillUsedQueryString()
+
+      if (billUseAllQuery !== '' && queryAuthString !== '' && queryAuthString !== undefined) {
+        billUseAllQuery = billUseAllQuery + ' AND ' + queryAuthString
+      } else {
+        if (queryAuthString !== '' && queryAuthString !== undefined) {
+          billUseAllQuery = queryAuthString
+        }
+      }
+      console.log(billUseAllQuery)
+      if (billUseAllQuery !== '') {
+        const BillQueryLayerUrl = config.queryLayers.RasReportBillUsedVW
+        const BillQueryLayer = new FeatureLayer({ url: BillQueryLayerUrl })
+
+        console.log(config)
+        let query
+        query = BillQueryLayer.createQuery()
+        query.where = billUseAllQuery
+        query.returnGeometry = false
+        query.returnDistinctValues = true
+        query.outSpatialReference = new SpatialReference({ wkid: 3857 })
+        query.outFields = ['ST_ALLOT_NR']
+        console.log(query)
+
+        BillQueryLayer.queryFeatures(query).then(function (result) {
+          if (result.features.length > 0) {
+            console.log(result.features)
+            const features = result.features
+            console.log('billed use features:', features)
+            // setBillScheduleOptions(features)
+            // console.log(features)
+          }
+        })
+      }
+
+      //widgetContext.map.addLayer(graphicsLayers.Layers["BilledUse"]);
+      // const queryTask = new QueryTask(widgetContext.appConfig.queryLayers.RasReportBillUsedVW)
+      // const query = new Query()
+      // query.returnGeometry = false
+      // query.outSpatialReference = new SpatialReference({ wkid: 3857 })
+      // query.returnDistinctValues = true
+      // query.outFields = ['ST_ALLOT_NR']
+      // query.where = billUseAllQuery
+      // queryTask.execute(query).then(lang.hitch(this, this.queryAllComplianceRecords))
+      //queryTask.execute(query).then(lang.hitch(this, this.queryAllotmentFeatures,"AuthAuthority"));
+      //this.queryBilledUse(billUseAllQuery);
+    // } else {
+    //   this.queryAllComplianceRecords()
+    // }
+  }
+}
+
+  useEffect(() => {
+    queryAllBillUsedRecords()
+  }, [startBilled])
+
+  // useEffect(() => {
+  //   getAllBillUsedQueryString()
+  // }, [burro, cattle, goat, horse, sheep, yCattle, ind, grazingYear, scheduleType])
+
   function handleCheckBoxChange (checkboxid, checked) {
     console.log(checkboxid, checked)
     if (checkboxid === 'burro') {
@@ -98,114 +177,117 @@ const BilledUse = (styles) => {
     }
   }
 
-  useEffect(() => {
+  function getQueryChkBoxForBillUse () {
     let outString = ''
     if (burro) {
       outString = " ( LIVESTOCK_KIND_NM = 'B - BURRO'"
     }
 
     if (cattle) {
-      if (outString === "") {
-        outString = " ( LIVESTOCK_KIND_NM = 'C - CATTLE'";
+      if (outString === '') {
+        outString = " ( LIVESTOCK_KIND_NM = 'C - CATTLE'"
       } else {
-        outString = outString + " OR " + " LIVESTOCK_KIND_NM = 'C - CATTLE'";
+        outString = outString + ' OR ' + " LIVESTOCK_KIND_NM = 'C - CATTLE'"
       }
     }
 
     if (goat) {
-      if (outString === "") {
-        outString = " ( LIVESTOCK_KIND_NM = 'G - GOAT'";
+      if (outString === '') {
+        outString = " ( LIVESTOCK_KIND_NM = 'G - GOAT'"
       } else {
-        outString = outString + " OR " + "LIVESTOCK_KIND_NM = 'G - GOAT'";
+        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'G - GOAT'"
       }
     }
 
     if (sheep) {
-      if (outString === "") {
-        outString = " ( LIVESTOCK_KIND_NM = 'S - SHEEP'";
+      if (outString === '') {
+        outString = " ( LIVESTOCK_KIND_NM = 'S - SHEEP'"
       } else {
-        outString = outString + " OR " + "LIVESTOCK_KIND_NM = 'S - SHEEP'";
+        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'S - SHEEP'"
       }
     }
 
     if (horse) {
-      if (outString === "") {
-        outString = " ( LIVESTOCK_KIND_NM = 'H - HORSE'";
+      if (outString === '') {
+        outString = " ( LIVESTOCK_KIND_NM = 'H - HORSE'"
       } else {
-        outString = outString + " OR " + "LIVESTOCK_KIND_NM = 'H - HORSE'";
+        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'H - HORSE'"
       }
     }
 
     if (yCattle) {
-      if (outString === "") {
-        outString = " ( LIVESTOCK_KIND_NM = 'Y - YRLING CATTLE'";
+      if (outString === '') {
+        outString = " ( LIVESTOCK_KIND_NM = 'Y - YRLING CATTLE'"
       } else {
-        outString = outString + " OR " + "LIVESTOCK_KIND_NM = 'Y - YRLING CATTLE'";
+        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'Y - YRLING CATTLE'"
       }
     }
 
     if (ind) {
       if (outString === '') {
-        outString = "( LIVESTOCK_KIND_NM = 'I - INDIGENOUS'";
+        outString = "( LIVESTOCK_KIND_NM = 'I - INDIGENOUS'"
       } else {
-        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'I - INDIGENOUS'";
+        outString = outString + ' OR ' + "LIVESTOCK_KIND_NM = 'I - INDIGENOUS'"
       }
     }
 
-    if (outString !== '') { outString = outString + " ) "}
+    if (outString !== '') {
+      outString = outString + ' ) '
+    }
     setBilledUseString(outString)
+
     console.log('billed use query string is:', outString)
-  }, [burro, goat, ind, sheep, cattle, horse, yCattle])
-// reaplce with grazing year value selection
-  getQueryGrazingYearDD function(){
+    return outString
+  }
+  // reaplce with grazing year value selection
+  function getQueryGrazingYearDD () {
+    if (grazingYear !== '' && grazingYear !== 'undefined') {
+      if (grazingYear !== '0') {
+        return " ( GRAZING_FEE_YEAR_TX = '" + grazingYear + "' ) "
+      } else {
+        return ''
+      }
+    } return ''
+  }
 
-    if(widgetContext.selectGrazingYear.value != "" && widgetContext.selectGrazingYear.value != "undefined")
-    {   
-        if(widgetContext.selectGrazingYear.value !== "0")
-        {
-            return  " ( GRAZING_FEE_YEAR_TX = '" +  widgetContext.selectGrazingYear.value + "' ) ";
-        }return "";
-    }return "";
-},
+  // reaplce with grazing schedule type value selection
+  function getQueryScheduleTypeDD () {
+    if (scheduleType !== '' && scheduleType !== 'undefined') {
+      if (scheduleType !== '0') {
+        return " ( USE_TYPE_NM  = '" + scheduleType + "' ) "
+      } else {
+        return ''
+      }
+    } return ''
+  }
 
-// reaplce with grazing schedule type value selection
-getQueryScheduleTypeDD function(){
-    if(widgetContext.selectBSTU.value != "" && widgetContext.selectBSTU.value != "undefined")
-    {
-        if(widgetContext.selectBSTU.value !== "0")
-        {
-            return  " ( USE_TYPE_NM  = '" +  widgetContext.selectBSTU.value + "' ) ";
-        }return "";
-    }return "";
-},
+  function getAllBillUsedQueryString () {
+    let queryStringforBillUsedLiveStock = getQueryChkBoxForBillUse()
+    let billUseAllQuery = queryStringforBillUsedLiveStock
 
-// this combines the queries for billed use
-//
-getAllBillUsedQueryString function() {
-    var queryStringforBillUsedLiveStock = this._getQueryChkBoxForBillUse();
-    var billUseAllQuery = queryStringforBillUsedLiveStock;
+    let queryStringforBillUsedGrazingYear = getQueryGrazingYearDD()
 
-    var queryStringforBillUsedGrazingYear = this._getQueryGrazingYearDD();
-    if (billUseAllQuery !== "" && queryStringforBillUsedGrazingYear !== "") {
-        billUseAllQuery = billUseAllQuery + "  AND " + queryStringforBillUsedGrazingYear;
-    }
-    else {
-        if (queryStringforBillUsedGrazingYear !== "") {
-            billUseAllQuery = queryStringforBillUsedGrazingYear;
-        }
+    if (billUseAllQuery !== '' && queryStringforBillUsedGrazingYear !== '') {
+      billUseAllQuery = billUseAllQuery + '  AND ' + queryStringforBillUsedGrazingYear
+    } else {
+      if (queryStringforBillUsedGrazingYear !== '') {
+        billUseAllQuery = queryStringforBillUsedGrazingYear
+      }
     }
 
-    var queryStringforBillUsedTypeUse = this._getQueryScheduleTypeDD();
-    if (billUseAllQuery !== "" && queryStringforBillUsedTypeUse !== "") {
-        billUseAllQuery = billUseAllQuery + "  AND " + queryStringforBillUsedTypeUse;
+    let queryStringforBillUsedTypeUse = getQueryScheduleTypeDD()
+    if (billUseAllQuery !== '' && queryStringforBillUsedTypeUse !== '') {
+      billUseAllQuery = billUseAllQuery + '  AND ' + queryStringforBillUsedTypeUse
+    } else {
+      if (queryStringforBillUsedTypeUse !== '') {
+        billUseAllQuery = queryStringforBillUsedTypeUse
+      }
     }
-    else {
-        if (queryStringforBillUsedTypeUse !== "") {
-            billUseAllQuery = queryStringforBillUsedTypeUse;
-        }
-    }
-    return billUseAllQuery;
-},
+    console.log(billUseAllQuery)
+    setBilledUseFinalQuery(billUseAllQuery)
+    console.log(billUseAllQuery)
+    return billUseAllQuery
+  }
 
   return (
     <>
@@ -224,7 +306,7 @@ getAllBillUsedQueryString function() {
             >
               <div>
                 <label>Livestock Kind:</label>
-                <div style={styles.styles.container}>
+                <div style={styles.container}>
                 <Label
                   centric
                   check
@@ -268,7 +350,7 @@ getAllBillUsedQueryString function() {
                 GOAT
                 </Label>
               </div>
-              <div style={styles.styles.container}>
+              <div style={styles.container}>
                 <Label
                   centric
                   check

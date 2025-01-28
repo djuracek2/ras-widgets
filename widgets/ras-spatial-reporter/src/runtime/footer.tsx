@@ -9,7 +9,7 @@ const Footer = ({ sharedState }) => {
         aria-pressed="false"
         type="primary"
         disabled={!sharedState.inputValidation}
-        onClick={sharedState.runQuery}
+        onClick={sharedState.onSearch}
       >
         Search
       </Button>
