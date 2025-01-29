@@ -5,7 +5,7 @@ import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
 import SpatialReference from '@arcgis/core/geometry/SpatialReference'
 import config from '../configs/config.json'
 
-const BilledUse = ({ styles, startBilled, featuresForBilled }) => {
+const BilledUse = ({ setFeatureForInspection, setStartInspection, styles, startBilled, featuresForBilled }) => {
   const [burro, setBurro] = useState(false)
   const [cattle, setCattle] = useState(false)
   const [goat, setGoat] = useState(false)
@@ -22,12 +22,10 @@ const BilledUse = ({ styles, startBilled, featuresForBilled }) => {
 
   function handleGrazingYear (event) {
     setGrazingYear(event.target.value)
-    console.log(grazingYear)
   }
 
   function handleScheduleType (event) {
     setScheduleType(event.target.value)
-    console.log(scheduleType)
   }
 
   useEffect(() => {
@@ -39,7 +37,6 @@ const BilledUse = ({ styles, startBilled, featuresForBilled }) => {
     const BillLayerUrl = config.queryLayers.authUseTable
     const BillLayer = new FeatureLayer({ url: BillLayerUrl })
 
-    console.log(config)
     let query
     query = BillLayer.createQuery()
     query.where = '1=1'
@@ -49,11 +46,8 @@ const BilledUse = ({ styles, startBilled, featuresForBilled }) => {
 
     BillLayer.queryFeatures(query).then(function (result) {
       if (result.features.length > 0) {
-        console.log(result.features)
         const features = result.features
-        console.log(features)
         setBillYearOptions(features)
-        console.log(features)
       }
     })
   }
@@ -62,7 +56,6 @@ const BilledUse = ({ styles, startBilled, featuresForBilled }) => {
     const BillSchedLayerUrl = config.queryLayers.authUseTable
     const BillSchedLayer = new FeatureLayer({ url: BillSchedLayerUrl })
 
-    console.log(config)
     let query
     query = BillSchedLayer.createQuery()
     query.where = '1=1'
@@ -72,7 +65,6 @@ const BilledUse = ({ styles, startBilled, featuresForBilled }) => {
 
     BillSchedLayer.queryFeatures(query).then(function (result) {
       if (result.features.length > 0) {
-        console.log(result.features)
         const features = result.features
         console.log(features)
         setBillScheduleOptions(features)
@@ -88,8 +80,6 @@ const BilledUse = ({ styles, startBilled, featuresForBilled }) => {
       if (features.length > 0) {
         const resultAuthFeatures = features
         queryAuthString = 'ST_ALLOT_NR in ('
-
-        let rowResult
 
         resultAuthFeatures.forEach((feature) => {
           queryAuthString += "'" + feature.attributes.ST_ALLOT_NR + "',"
@@ -112,7 +102,6 @@ const BilledUse = ({ styles, startBilled, featuresForBilled }) => {
         const BillQueryLayerUrl = config.queryLayers.RasReportBillUsedVW
         const BillQueryLayer = new FeatureLayer({ url: BillQueryLayerUrl })
 
-        console.log(config)
         let query
         query = BillQueryLayer.createQuery()
         query.where = billUseAllQuery
@@ -124,31 +113,15 @@ const BilledUse = ({ styles, startBilled, featuresForBilled }) => {
 
         BillQueryLayer.queryFeatures(query).then(function (result) {
           if (result.features.length > 0) {
-            console.log(result.features)
             const features = result.features
             console.log('billed use features:', features)
-            // setBillScheduleOptions(features)
-            // console.log(features)
+            setFeatureForInspection(features)
+            setStartInspection(true)
           }
         })
       }
-
-      //widgetContext.map.addLayer(graphicsLayers.Layers["BilledUse"]);
-      // const queryTask = new QueryTask(widgetContext.appConfig.queryLayers.RasReportBillUsedVW)
-      // const query = new Query()
-      // query.returnGeometry = false
-      // query.outSpatialReference = new SpatialReference({ wkid: 3857 })
-      // query.returnDistinctValues = true
-      // query.outFields = ['ST_ALLOT_NR']
-      // query.where = billUseAllQuery
-      // queryTask.execute(query).then(lang.hitch(this, this.queryAllComplianceRecords))
-      //queryTask.execute(query).then(lang.hitch(this, this.queryAllotmentFeatures,"AuthAuthority"));
-      //this.queryBilledUse(billUseAllQuery);
-    // } else {
-    //   this.queryAllComplianceRecords()
-    // }
+    }
   }
-}
 
   useEffect(() => {
     queryAllBillUsedRecords()
@@ -159,7 +132,6 @@ const BilledUse = ({ styles, startBilled, featuresForBilled }) => {
   // }, [burro, cattle, goat, horse, sheep, yCattle, ind, grazingYear, scheduleType])
 
   function handleCheckBoxChange (checkboxid, checked) {
-    console.log(checkboxid, checked)
     if (checkboxid === 'burro') {
       setBurro(!burro)
     } else if (checkboxid === 'cattle') {
@@ -283,7 +255,6 @@ const BilledUse = ({ styles, startBilled, featuresForBilled }) => {
         billUseAllQuery = queryStringforBillUsedTypeUse
       }
     }
-    console.log(billUseAllQuery)
     setBilledUseFinalQuery(billUseAllQuery)
     console.log(billUseAllQuery)
     return billUseAllQuery

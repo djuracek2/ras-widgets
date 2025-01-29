@@ -12,8 +12,10 @@ const QueryAll = ({ sharedState, styles, stateSel, districtOffice, fieldOffice }
   const [queryDates, setQueryDates] = useState('')
   const [noDatesTrigger, setNoDatesTrigger] = useState('1')
   const [featuresForBilled, setFeaturesForBilled] = useState([])
+  const [featuresForInspection, setFeatureForInspection] = useState([])
 
   const [startBilled, setStartBilled] = useState(false)
+  const [startInspection, setStartInspection] = useState(false)
 
   //   var queryAuthLiveStockString = "";
   //   var queryStringAuthorizationAuth="";
@@ -64,8 +66,8 @@ const QueryAll = ({ sharedState, styles, stateSel, districtOffice, fieldOffice }
   <>
     <Allotments styles={styles} stateSel={stateSel} setQuery={setAllotAuthQuery} districtOffice={districtOffice} office={fieldOffice}></Allotments>
     <Authorizations setNoDatesTrigger={setNoDatesTrigger} setFeaturesForBilled={setFeaturesForBilled} setStartBilled={setStartBilled} sharedState={sharedState} qryReportViewAuthAllotmentString={qryReportViewAuthAllotmentString} setQueryDates={setQueryDates} setQueryStringAuthorizationAuth={setQueryStringAuthorizationAuth} setQueryAuthLiveStockString={setQueryAuthLiveStockString} styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></Authorizations>
-    <BilledUse featuresForBilled={featuresForBilled}startBilled={startBilled} styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></BilledUse>
-    <Inspections styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></Inspections>
+    <BilledUse setFeatureForInspection={setFeatureForInspection} setStartInspection={setStartInspection} featuresForBilled={featuresForBilled}startBilled={startBilled} styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></BilledUse>
+    <Inspections featureForInspection={featuresForInspection} startInspection={startInspection} styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></Inspections>
  </>
   )
 }

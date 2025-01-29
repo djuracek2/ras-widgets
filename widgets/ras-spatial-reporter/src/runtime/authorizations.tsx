@@ -1,6 +1,6 @@
 import { React, type AllWidgetProps } from 'jimu-core'
-import { useState, useEffect, useRef } from 'react'
-import { Checkbox, Label, Switch, TextInput, Button, ButtonGroup, Select, Option, CollapsablePanel, Radio } from 'jimu-ui'
+import { useState, useEffect } from 'react'
+import { Checkbox, Label, CollapsablePanel } from 'jimu-ui'
 import { DatePicker } from 'jimu-ui/basic/date-picker'
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
 import config from '../configs/config.json'
@@ -17,37 +17,45 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
   const [fullyPro, setfullyPro] = useState(false)
   const [decStayed, setDecStayed] = useState(false)
   const [effBegin, setEffBegin] = useState()
+  const [effBeginTimeConverter, setEffTimeBeginConverter] = useState()
   const [effEnd, setEffEnd] = useState()
+  const [effTimeEndConverter, setEffTimeEndConverter] = useState()
   const [expBegin, setExpBegin] = useState()
+  const [expTimeBeginConverter, setExpTimeBeginConverter] = useState()
   const [expEnd, setExpEnd] = useState()
+  const [expTimeEndConverter, setExpTimeEndConverter] = useState()
   const [issBegin, setIssBegin] = useState('')
   const [issEnd, setIssEnd] = useState('')
 
+  function transformDate(val) {
+    const date = new Date(val)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    const seconds = String(date.getSeconds()).padStart(2, '0')
+    const convertedTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+    return convertedTime
+  }
+
   function handleEffectiveDate (type, val) {
     if (type === 'begin') {
-      // might need to change these to formattedBegData for query on feature service?
-      // or add another state?
-      // const effectiveBegin = new Date(val)
-      // effectiveBegin.setDate(effectiveBegin.getDate() + 1)
-      // const formattedBegDate = effectiveBegin.toISOString().split('T')[0]
       setEffBegin(val)
-      // console.log(formattedBegDate)
+      setEffTimeBeginConverter(transformDate(val))
     } else {
-      // here too
-      // const effectiveEnd = new Date(val)
-      // effectiveEnd.setDate(effectiveEnd.getDate() + 1)
-      // const formattedEndDate = effectiveEnd.toISOString().split('T')[0]
       setEffEnd(val)
-      // console.log(formattedEndDate)
+      setEffTimeEndConverter(transformDate(val))
     }
   }
 
   function handleExpirationDate (type, val) {
     if (type === 'begin') {
       setExpBegin(val)
-      console.log(expBegin)
+      setExpTimeBeginConverter(transformDate(val))
     } else {
       setExpEnd(val)
+      setExpTimeEndConverter(transformDate(val))
       console.log(expEnd)
     }
   }
@@ -63,7 +71,6 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
   }
 
   function handleCheckBoxChange (checkboxid, checked) {
-    console.log(checkboxid, checked)
     if (checkboxid === 'burro') {
       setBurro(!burro)
     } else if (checkboxid === 'cattle') {
@@ -150,8 +157,8 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
     if (sharedState.isSearching) {
       getAuthLiveStockQuery()
       getAuthAuthorityQuery()
+      getAuthorityDatesQuery()
       setNoDatesTrigger('2')
-      // getAuthorityDatesQuery()
     }
   }, [sharedState.isSearching])
 
@@ -196,16 +203,16 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
     let queryDates = ''
     // Not adding issue mng for now as its coded out
     // check if still needed in ui
-    if (effBegin !== '' && effEnd !== '') {
-      queryDates = " (AUTH_EFT_DT >= '" + effBegin + "' AND AUTH_EFT_DT <= '" + effEnd + "') "
+    if (effBeginTimeConverter !== '' && effTimeEndConverter !== '') {
+      queryDates = " (AUTH_EFT_DT >= TIMESTAMP '" + effBeginTimeConverter + "' AND AUTH_EFT_DT <= TIMESTAMP '" + effTimeEndConverter + "') "
     }
 
     //DONT SEE THESE FIELDS IN CODE!!!
-    if (expBegin !== '' && expEnd !== '') {
+    if (expTimeBeginConverter !== '' && expTimeEndConverter !== '') {
       if (queryDates === '') {
-        queryDates = " (AUTH_EXP_DT >= '" + expBegin + "' AND AUTH_EXP_DT <= '" + expEnd + "') "
+        queryDates = " (AUTH_EXP_DT >= TIMESTAMP '" + expTimeBeginConverter + "' AND AUTH_EXP_DT <= TIMESTAMP '" + expTimeEndConverter + "') "
       } else {
-        queryDates = queryDates + ' AND ' + " ( AUTH_EXP_DT >= '" + expBegin + "' AND AUTH_EXP_DT <= '" + expEnd + "' )"
+        queryDates = queryDates + ' AND ' + " ( AUTH_EXP_DT >= TIMESTAMP '" + expTimeBeginConverter + "' AND AUTH_EXP_DT <= TIMESTAMP '" + expTimeEndConverter + "' )"
       }
     }
     setQueryDates(queryDates)
@@ -216,18 +223,15 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
   function queryAuthAuthority (qryReportViewAuthAllotmentString: string) {
     const RasAuthAllot = config.queryLayers.RasReportAuthAllotmentVW
     const RasAuthLayer = new FeatureLayer({ url: RasAuthAllot })
-    console.log(RasAuthLayer)
 
-    console.log(config)
     let query
     query = RasAuthLayer.createQuery()
     query.where = qryReportViewAuthAllotmentString
     query.returnGeometry = false
-    query.outFields = ["ST_ALLOT_NR"]
+    query.outFields = ['ST_ALLOT_NR']
     if (qryReportViewAuthAllotmentString !== '') {
       RasAuthLayer.queryFeatures(query).then(function (result) {
         if (result) {
-          console.log(result.features)
           const features = result.features
           console.log(features)
           setFeaturesForBilled(features)
@@ -427,7 +431,9 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
                       <DatePicker
                         aria-describedby="date-picker-desc-id"
                         aria-label="DateTime picker label"
-                        format="MM/dd/yyyy"
+                        format="shortDateLongTime"
+                        isTimeLong
+                        showTimeInput
                         onChange={(val) => { handleEffectiveDate('begin', val) }}
                         selectedDate={effBegin}
                         strategy="absolute"
@@ -456,7 +462,9 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
                         <DatePicker
                           aria-describedby="date-picker-desc-id"
                           aria-label="DateTime picker label"
-                          format="MM/dd/yyyy"
+                          format="shortDateLongTime"
+                          isTimeLong
+                          showTimeInput
                           onChange={(val) => { handleEffectiveDate('end', val) }}
                           selectedDate={effEnd}
                           strategy="absolute"
@@ -480,7 +488,9 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
                       <DatePicker
                         aria-describedby="date-picker-desc-id"
                         aria-label="DateTime picker label"
-                        format="MM/dd/yyyy"
+                        format="shortDateLongTime"
+                        isTimeLong
+                        showTimeInput
                         selectedDate={expBegin}
                         onChange={(val) => { handleExpirationDate('begin', val) }}
                         strategy="absolute"
@@ -500,7 +510,9 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
                         <DatePicker
                           aria-describedby="date-picker-desc-id"
                           aria-label="DateTime picker label"
-                          format="MM/dd/yyyy"
+                          format="shortDateLongTime"
+                          isTimeLong
+                          showTimeInput
                           selectedDate={expEnd}
                           onChange={(val) => { handleExpirationDate('end', val) }}
                           strategy="absolute"
