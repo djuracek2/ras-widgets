@@ -89,7 +89,8 @@ const Main = ({ sharedState }) => {
                 <Option value={'Select a Office'}>Select a Office...</Option>
               {sharedState.officeOptions?.map(district =>
               <Option
-              value={district.attributes.ADMIN_ST + '-' + district.attributes.ADMU_NAME}>
+
+              value={district.attributes.ADM_UNIT_CD}>
                   {district.attributes.ADMU_NAME}
               </Option>
               )}

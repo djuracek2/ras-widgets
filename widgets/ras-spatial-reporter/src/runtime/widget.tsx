@@ -18,7 +18,6 @@ import Main from "./main";
 import Header from "./header";
 import config from '../configs/config.json'
 import QueryAll from "./queryall";
-import { FixedAnimationSetting } from "dist/widgets/common/controller/src/setting/fixed-layout-setting/animation-setting";
 import SearchBar from "./searchbar";
 
  const Widget = (props: AllWidgetProps<IMConfig>) => {
@@ -31,7 +30,15 @@ import SearchBar from "./searchbar";
   const [districtOptions, setDistrictOptions] = useState([])
   const [officeOptions, setOfficeOptions] = useState([])
   const graphicLayerRef = useRef<GraphicsLayer>(null)
+  const allotGraphicsLayer = useRef<GraphicsLayer>(null)
+  const authGraphicsLayer = useRef<GraphicsLayer>(null)
+  const billedGraphicsLayer = useRef<GraphicsLayer>(null)
+  const inspGraphicsLayer = useRef<GraphicsLayer>(null)
+
+  
   const [allotment, setAllotmentNumber] = useState('')
+  const [allotGroupList, setAllotGroupList] = useState([])
+  const [allotList, setAllotList] = useState([])
   const [officeId, setOfficeId] = useState('')
   const [inputValidation, setInputValidation] = useState(true)
   const [viewReady, setViewReady] = useState(false)
@@ -45,7 +52,16 @@ import SearchBar from "./searchbar";
   useEffect(() => {
     if (sjmv && !graphicLayerRef.current) {
       const graphicsLayer = new GraphicsLayer()
+      allotGraphicsLayer.current = new GraphicsLayer()
+      authGraphicsLayer.current = new GraphicsLayer()
+      billedGraphicsLayer.current = new GraphicsLayer()
+      inspGraphicsLayer.current = new GraphicsLayer()
+
       sjmv.view.map.add(graphicsLayer)
+      sjmv.view.map.add(allotGraphicsLayer.current)
+      sjmv.view.map.add(authGraphicsLayer.current)
+      sjmv.view.map.add(billedGraphicsLayer.current)
+      sjmv.view.map.add(inspGraphicsLayer.current)
       graphicLayerRef.current = graphicsLayer
     }
   }, [sjmv])
@@ -70,6 +86,8 @@ import SearchBar from "./searchbar";
     setDistrictOptions([])
     handleFieldOffice('')
     setOfficeOptions([])
+    setAllotGroupList([])
+    setAllotList([])
     setRefreshCount(0)
     setIsRefreshing(true)
   }
@@ -103,6 +121,8 @@ import SearchBar from "./searchbar";
     stateSel,
     districtOffice,
     fieldOffice,
+    allotList,
+    allotGroupList,
     handleStateChange,
     handleDistrictOfficeChange,
     handleFieldOfficeChange,
@@ -238,6 +258,44 @@ import SearchBar from "./searchbar";
     })
   }
 
+  function populateAllotment (office: string) {
+    const allotPolyLayer = new FeatureLayer({
+      url: config.queryLayers.allotmentPolyLayer
+    })
+
+    let query = allotPolyLayer.createQuery()
+    query.returnGeometry = false
+    query.returnDistinctValues = true
+    query.outFields = ['*']
+    query.where = `ADMIN_UNIT_CD = '${office}'`
+
+    allotPolyLayer.queryFeatures(query).then(function (response) {
+      const features = response.features
+      setAllotList(features)
+    })
+  }
+
+  function populateAllotmentGroup (office: string) {
+    console.log(office)
+    const allotTable = new FeatureLayer({
+      url: config.queryLayers.allotmentGroupTable
+    })
+    console.log(allotTable)
+
+    let query = allotTable.createQuery()
+    //ADMIN_OFC_CD = 'LLCOS00000'
+    query.returnGeometry = false
+    query.returnDistinctValues = true
+    query.outFields = ['*']
+    query.where = "ADMIN_OFC_CD = 'LL" + office + "'"
+
+    allotTable.queryFeatures(query).then(function (response) {
+      const features = response.features
+      setAllotGroupList(features)
+    })
+  }
+
+
   function zoomToOffice (office: string) {
     const OfficeLayerUrl = config.queryLayers.officeLayer
     const OfficeLayer = new FeatureLayer({ url: OfficeLayerUrl })
@@ -245,7 +303,7 @@ import SearchBar from "./searchbar";
     console.log(config)
     let query
     query = OfficeLayer.createQuery()
-    query.where = `ADMU_NAME = '${office}'`
+    query.where = `ADM_UNIT_CD = '${office}'`
     query.returnGeometry = true
     query.outFields = ['*']
 
@@ -283,7 +341,12 @@ import SearchBar from "./searchbar";
         }
       }
     })
+
+    populateAllotment(office)
+    populateAllotmentGroup(office)
   }
+
+
 
   function queryOffice () {
     const OfficeLayerUrl = config.queryLayers.officeLayer

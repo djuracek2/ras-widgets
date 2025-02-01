@@ -6,14 +6,13 @@ import { TableArrangeType } from 'dist/widgets/common/table/src/config'
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
 import config from '../configs/config.json'
 
-const Allotments = ({ sharedState, styles, stateSel, districtOffice, office, setQuery }) => {
+const Allotments = ({ sharedState, styles }) => {
   const [allotmentValue, setAllotmentValue] = useState('')
   const [allotGroupValue, setAllotGroupValue] = useState('')
   const [allotAccept, setAllotAccept] = useState(false)
   const [allotReject, setAllotReject] = useState(false)
   const [allotReview, setAllotReview] = useState(false)
-  const [allotGroupList, setAllotGroupList] = useState('')
-  const [allotList, setAllotList] = useState('')
+
   const [outQueryStringAllotment, setOutQueryStringAllotment] = useState('')
 
   useEffect(() => {
@@ -38,44 +37,12 @@ const Allotments = ({ sharedState, styles, stateSel, districtOffice, office, set
     }
   }
 
-  function populateAllotment (office: string) {
-    const allotPolyLayer = new FeatureLayer({
-      url: config.queryLayers.allotmentPolyLayer
-    })
 
-    let query = allotPolyLayer.createQuery()
-    query.returnGeometry = false
-    query.outFields = ['*']
-    query.where = `ADMIN_UNIT_CD = '${office}'`
-
-    allotPolyLayer.queryFeatures(query).then(function (response) {
-      console.log(response)
-    })
-  }
-
-  function populateAllotmentGroup (office: string) {
-    console.log(office)
-    const allotTable = new FeatureLayer({
-      url: config.queryLayers.allotmentGroupTable
-    })
-    console.log(allotTable)
-
-    let query = allotTable.createQuery()
-    //ADMIN_OFC_CD = 'LLCOS00000'
-    query.returnGeometry = false
-    query.outFields = ['*']
-    query.where = "ADMIN_OFC_CD = 'LL" + office + "'"
-
-    allotTable.queryFeatures(query).then(function (response) {
-      console.log(response)
-    })
-  }
-
-  useEffect(() => {
-    populateAllotment(office)
-    populateAllotmentGroup(office)
-    // populate allotments & group on office change
-  }, [office])
+  // useEffect(() => {
+  //   populateAllotment(office)
+  //   populateAllotmentGroup(office)
+  //   // populate allotments & group on office change
+  // }, [office])
 
 
 
@@ -175,9 +142,12 @@ const Allotments = ({ sharedState, styles, stateSel, districtOffice, office, set
                 <Select
                 onChange={handleAllotGroupSelect}
                 value={allotGroupValue}>
-                <Option value="california">
-                  California
-                </Option>
+                 {sharedState.allotGroupList?.map(year =>
+                          <Option
+                          value={year.attributes.ALLOT_GRP_ID}>
+                              {year.attributes.ALLOT_GRP_ID + "-" + year.attributes.ALLOT_GRP_NM}
+                          </Option>
+              )}
                 </Select>
               </div>
               <div className="d-flex align-items-center" id="Allotments"
@@ -188,11 +158,13 @@ const Allotments = ({ sharedState, styles, stateSel, districtOffice, office, set
                     <Label style={{ width: '140px' }}>Allotments:</Label>
                 <Select
                   onChange={handleAllotmentSelect}
-                  value={allotmentValue}
-                >
-                <Option value="california">
-                  California
-                </Option>
+                  value={allotmentValue}>
+                  {sharedState.allotList?.map(year =>
+                    <Option
+                    value={year.attributes.ST_ALLOT_NR}>
+                        {year.attributes.ST_ALLOT_NR + "-" + year.attributes.ALLOT_NM}
+                    </Option>
+        )}
                 </Select>
               </div>
               <div className="d-flex align-items-center" style={{ paddingTop: '5px' }}>
