@@ -13,7 +13,6 @@ const QueryAll = ({ sharedState, styles, stateSel, districtOffice, fieldOffice }
   const [noDatesTrigger, setNoDatesTrigger] = useState('1')
   const [featuresForBilled, setFeaturesForBilled] = useState([])
   const [featuresForInspection, setFeatureForInspection] = useState([])
-
   const [startBilled, setStartBilled] = useState(false)
   const [startInspection, setStartInspection] = useState(false)
 
@@ -35,7 +34,7 @@ const QueryAll = ({ sharedState, styles, stateSel, districtOffice, fieldOffice }
         reportViewString = queryAuthLiveStockString
       }
     }
-  
+
     if (queryStringAuthorizationAuth !== '') {
       if (reportViewString !== '') {
         reportViewString = reportViewString + ' AND ' + queryStringAuthorizationAuth
@@ -64,10 +63,10 @@ const QueryAll = ({ sharedState, styles, stateSel, districtOffice, fieldOffice }
 
   return (
   <>
-    <Allotments styles={styles} stateSel={stateSel} setQuery={setAllotAuthQuery} districtOffice={districtOffice} office={fieldOffice}></Allotments>
+    <Allotments sharedState={sharedState} styles={styles} stateSel={stateSel} setQuery={setAllotAuthQuery} districtOffice={districtOffice} office={fieldOffice}></Allotments>
     <Authorizations setNoDatesTrigger={setNoDatesTrigger} setFeaturesForBilled={setFeaturesForBilled} setStartBilled={setStartBilled} sharedState={sharedState} qryReportViewAuthAllotmentString={qryReportViewAuthAllotmentString} setQueryDates={setQueryDates} setQueryStringAuthorizationAuth={setQueryStringAuthorizationAuth} setQueryAuthLiveStockString={setQueryAuthLiveStockString} styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></Authorizations>
-    <BilledUse setFeatureForInspection={setFeatureForInspection} setStartInspection={setStartInspection} featuresForBilled={featuresForBilled}startBilled={startBilled} styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></BilledUse>
-    <Inspections featureForInspection={featuresForInspection} startInspection={startInspection} styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></Inspections>
+    <BilledUse sharedState={sharedState} setFeatureForInspection={setFeatureForInspection} setStartInspection={setStartInspection} featuresForBilled={featuresForBilled} startBilled={startBilled} styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></BilledUse>
+    <Inspections sharedState={sharedState} featureForInspection={featuresForInspection} startInspection={startInspection} styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}></Inspections>
  </>
   )
 }

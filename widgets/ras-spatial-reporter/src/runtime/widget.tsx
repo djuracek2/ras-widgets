@@ -8,50 +8,39 @@ import { type IMConfig } from "../config";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import { Checkbox, Label, Switch, TextInput, Button, ButtonGroup, Select, Option, CollapsablePanel, Radio, Loading } from "jimu-ui";
 import { DatePicker } from 'jimu-ui/basic/date-picker'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import AcceptModal from './modals/acceptmodal'
 import RejectModal from './modals/rejectmodal'
 import Graphic from "@arcgis/core/Graphic"
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
 import { JimuFeatureLayerView, JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
 import Main from "./main";
-import Allotments from "./allotments";
-import Authorizations from "./authorizations";
-import BilledUse from "./billeduse";
-import Inspections from "./inspections";
-import Footer from "./footer"
 import Header from "./header";
 import config from '../configs/config.json'
 import QueryAll from "./queryall";
 import { FixedAnimationSetting } from "dist/widgets/common/controller/src/setting/fixed-layout-setting/animation-setting";
+import SearchBar from "./searchbar";
 
  const Widget = (props: AllWidgetProps<IMConfig>) => {
   const [sjmv, setJimuMapView] = useState<JimuMapView>()
-  const [success, setSuccess] = useState(false)
-  const [failure, setFailure] = useState(false)
   const [checked, isChecked] = useState(false)
-  const [appCheck, isAppCheck] = useState(false)
-  const [appRej, isAppRej] = useState(false)
   const [stateSel, handleStateSel] = useState('')
   const [districtOffice, handleDistrictOffice] = useState('')
   const [fieldOffice, handleFieldOffice] = useState('')
   const [stateOfficeQuery, setStateOfficeQuery] = useState('')
- 
   const [districtOptions, setDistrictOptions] = useState([])
   const [officeOptions, setOfficeOptions] = useState([])
   const graphicLayerRef = useRef<GraphicsLayer>(null)
-  const [approvedText, setApprovedText] = useState('')
-  const [itemObjId, setItemObjId] = useState('')
-  const [feature, setSelectedFeature] = useState({})
-  const [defExpression, setDefExpression] = useState('')
   const [allotment, setAllotmentNumber] = useState('')
   const [officeId, setOfficeId] = useState('')
   const [inputValidation, setInputValidation] = useState(true)
-
   const [viewReady, setViewReady] = useState(false)
   const featureLayerRef = useRef<FeatureLayer>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSearching, setIsSearching] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [refreshCount, setRefreshCount] = useState(0)
+  const totalChildren = 4
 
   useEffect(() => {
     if (sjmv && !graphicLayerRef.current) {
@@ -64,8 +53,20 @@ import { FixedAnimationSetting } from "dist/widgets/common/controller/src/settin
   function runQuery () {
     console.log('query ran...')
   }
+
+  const handleChildRefresh = useCallback(() => {
+    setRefreshCount((prevCount) => {
+      const newCount = prevCount + 1
+      if (newCount === totalChildren) {
+        setIsRefreshing(false)
+      }
+      return newCount
+    })
+  }, [])
+
   function handleRefresh () {
-    console.log('refresh...')
+    setRefreshCount(0)
+    setIsRefreshing(true)
   }
 
   function handleCancel () {
@@ -110,7 +111,11 @@ import { FixedAnimationSetting } from "dist/widgets/common/controller/src/settin
     stateOfficeQuery,
     onSearch,
     isSearching,
-    setIsSearching
+    setIsSearching,
+    setIsRefreshing,
+    isRefreshing,
+    handleChildRefresh
+
   }
 
   const [formData, setFormData] = useState({
@@ -387,16 +392,6 @@ import { FixedAnimationSetting } from "dist/widgets/common/controller/src/settin
     queryOffice()
   }, [stateSel])
 
-
-  
-
-const handleChange = (changes) => {
-  setFormData({
-    ...formData,
-      ...changes
-  })
-}
-
   useEffect(() => {
     // ?allotmentNr=OR05105&officeId=ORB05000
     const params = new URLSearchParams(window.location.search)
@@ -431,7 +426,6 @@ const handleChange = (changes) => {
   }, [sjmv])
   return (
     <div className="widget-demo jimu-widget m-2" style={{ overflowY: 'scroll', height: '700px' }}>
-     
        {props.useMapWidgetIds && props.useMapWidgetIds.length === 1 && (
         <JimuMapViewComponent useMapWidgetId={props.useMapWidgetIds?.[0]} onActiveViewChange={activeViewChangeHandler} >
        {/* <div
@@ -458,7 +452,7 @@ const handleChange = (changes) => {
           <QueryAll sharedState={sharedState} styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}>
           </QueryAll>
         </div>
-        <Footer sharedState={sharedState}></Footer>
+        <SearchBar sharedState={sharedState}/>
     </div>
   )
 }

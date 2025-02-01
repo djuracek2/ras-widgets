@@ -16,16 +16,36 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
   const [_402, set402] = useState(false)
   const [fullyPro, setfullyPro] = useState(false)
   const [decStayed, setDecStayed] = useState(false)
-  const [effBegin, setEffBegin] = useState()
+  const [effBegin, setEffBegin] = useState('')
   const [effBeginTimeConverter, setEffTimeBeginConverter] = useState()
-  const [effEnd, setEffEnd] = useState()
+  const [effEnd, setEffEnd] = useState('')
   const [effTimeEndConverter, setEffTimeEndConverter] = useState()
-  const [expBegin, setExpBegin] = useState()
+  const [expBegin, setExpBegin] = useState('')
   const [expTimeBeginConverter, setExpTimeBeginConverter] = useState()
-  const [expEnd, setExpEnd] = useState()
+  const [expEnd, setExpEnd] = useState('')
   const [expTimeEndConverter, setExpTimeEndConverter] = useState()
   const [issBegin, setIssBegin] = useState('')
   const [issEnd, setIssEnd] = useState('')
+
+  useEffect(() => {
+    if (sharedState.isRefreshing) {
+      setBurro(false)
+      setCattle(false)
+      setGoat(false)
+      setHorse(false)
+      setSheep(false)
+      setYCattle(false)
+      setInd(false)
+      set402(false)
+      setfullyPro(false)
+      setDecStayed(false)
+      setEffBegin('')
+      setEffEnd('')
+      setExpBegin('')
+      setExpEnd('')
+      sharedState.handleChildRefresh()
+    }
+  }, [sharedState.isRefreshing])
 
   function transformDate(val) {
     const date = new Date(val)
@@ -159,6 +179,7 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
       getAuthAuthorityQuery()
       getAuthorityDatesQuery()
       setNoDatesTrigger('2')
+      sharedState.setIsSearching(false)
     }
   }, [sharedState.isSearching])
 
@@ -240,7 +261,7 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
     } else {
       setFeaturesForBilled('')
     }
-    sharedState.setIsSearching(false)
+
     setStartBilled(true)
   }
 

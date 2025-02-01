@@ -7,13 +7,23 @@ import SpatialReference from '@arcgis/core/geometry/SpatialReference'
 import config from '../configs/config.json'
 import { set } from 'seamless-immutable'
 
-const Inspections = ({ featureForInspection, startInspection, styles }) => {
+const Inspections = ({ sharedState, featureForInspection, startInspection, styles }) => {
   const [yes, setYes] = useState(false)
   const [no, setNo] = useState(false)
   const [beginTime, setBeginTime] = useState('')
   const [endTime, setEndTime] = useState('')
   const [endTimeConverter, setEndTimeConverter] = useState('')
   const [beginTimeConverter, setBeginTimeConverter] = useState('')
+
+  useEffect(() => {
+    if (sharedState.isRefreshing) {
+      setYes(false)
+      setNo(false)
+      setBeginTime('')
+      setEndTime('')
+      sharedState.handleChildRefresh()
+    }
+  }, [sharedState.isRefreshing])
 
   useEffect(() => {
     if (startInspection) {

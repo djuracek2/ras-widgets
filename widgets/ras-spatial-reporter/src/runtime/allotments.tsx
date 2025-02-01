@@ -6,7 +6,7 @@ import { TableArrangeType } from 'dist/widgets/common/table/src/config'
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
 import config from '../configs/config.json'
 
-const Allotments = ({ styles, stateSel, districtOffice, office, setQuery }) => {
+const Allotments = ({ sharedState, styles, stateSel, districtOffice, office, setQuery }) => {
   const [allotmentValue, setAllotmentValue] = useState('')
   const [allotGroupValue, setAllotGroupValue] = useState('')
   const [allotAccept, setAllotAccept] = useState(false)
@@ -15,6 +15,17 @@ const Allotments = ({ styles, stateSel, districtOffice, office, setQuery }) => {
   const [allotGroupList, setAllotGroupList] = useState('')
   const [allotList, setAllotList] = useState('')
   const [outQueryStringAllotment, setOutQueryStringAllotment] = useState('')
+
+  useEffect(() => {
+    if (sharedState.isRefreshing) {
+      setAllotAccept(false)
+      setAllotReject(false)
+      setAllotReview(false)
+      setAllotGroupValue('')
+      setAllotmentValue('')
+      sharedState.handleChildRefresh()
+    }
+  }, [sharedState.isRefreshing])
 
   function handleCheckBoxChange (checkboxid, checked) {
     console.log(checkboxid, checked)
@@ -31,8 +42,6 @@ const Allotments = ({ styles, stateSel, districtOffice, office, setQuery }) => {
     const allotPolyLayer = new FeatureLayer({
       url: config.queryLayers.allotmentPolyLayer
     })
-
-    console.log(allotPolyLayer)
 
     let query = allotPolyLayer.createQuery()
     query.returnGeometry = false
@@ -164,7 +173,8 @@ const Allotments = ({ styles, stateSel, districtOffice, office, setQuery }) => {
                   }}>
                     <Label style={{ width: '140px' }}>Allot Group:</Label>
                 <Select
-                onChange={handleAllotGroupSelect}>
+                onChange={handleAllotGroupSelect}
+                value={allotGroupValue}>
                 <Option value="california">
                   California
                 </Option>
@@ -178,6 +188,7 @@ const Allotments = ({ styles, stateSel, districtOffice, office, setQuery }) => {
                     <Label style={{ width: '140px' }}>Allotments:</Label>
                 <Select
                   onChange={handleAllotmentSelect}
+                  value={allotmentValue}
                 >
                 <Option value="california">
                   California
@@ -195,5 +206,5 @@ const Allotments = ({ styles, stateSel, districtOffice, office, setQuery }) => {
             </div>
           </CollapsablePanel>
     </>)
-} 
-export default Allotments;
+}
+export default Allotments

@@ -1,9 +1,8 @@
-import React from "react"
-import { Button, ButtonGroup } from "jimu-ui"
-
-const Footer = ({ sharedState }) => {
+import React from 'react'
+import { ButtonGroup, Button } from 'jimu-ui'
+const SearchBar = ({ sharedState }) => {
   return (
-    <div className='d-flex justify-content-center'>
+  <div className='d-flex justify-content-center'>
     <ButtonGroup size="default">
       <Button
         aria-pressed="false"
@@ -20,8 +19,6 @@ const Footer = ({ sharedState }) => {
        Cancel
       </Button>
     </ButtonGroup>
-    </div>
-    
-)
+    </div>)
 }
-export default Footer
+export default SearchBar

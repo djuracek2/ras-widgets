@@ -15,7 +15,7 @@ const Header = ({ toggleSwitch, isLoading, checked }) => {
         <Label>
         <Switch aria-label="Switch" disabled={isLoading} checked={checked} onChange={toggleSwitch}/>
             Filter by State/District/Field Offices
-        </Label> 
+        </Label>
     </>)
 }
 

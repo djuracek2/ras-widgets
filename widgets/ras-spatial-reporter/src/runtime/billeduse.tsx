@@ -5,7 +5,7 @@ import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
 import SpatialReference from '@arcgis/core/geometry/SpatialReference'
 import config from '../configs/config.json'
 
-const BilledUse = ({ setFeatureForInspection, setStartInspection, styles, startBilled, featuresForBilled }) => {
+const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, styles, startBilled, featuresForBilled }) => {
   const [burro, setBurro] = useState(false)
   const [cattle, setCattle] = useState(false)
   const [goat, setGoat] = useState(false)
@@ -19,6 +19,23 @@ const BilledUse = ({ setFeatureForInspection, setStartInspection, styles, startB
   const [billScheduleOptions, setBillScheduleOptions] = useState([])
   const [billedUseString, setBilledUseString] = useState('')
   const [billedUseFinalQuery, setBilledUseFinalQuery] = useState('')
+
+  useEffect(() => {
+    if (sharedState.isRefreshing) {
+      setBurro(false)
+      setCattle(false)
+      setGoat(false)
+      setHorse(false)
+      setSheep(false)
+      setYCattle(false)
+      setInd(false)
+      setGrazingYear('')
+      setScheduleType('')
+
+      sharedState.handleChildRefresh()
+    }
+  }, [sharedState.isRefreshing])
+
 
   function handleGrazingYear (event) {
     setGrazingYear(event.target.value)
@@ -388,7 +405,8 @@ const BilledUse = ({ setFeatureForInspection, setStartInspection, styles, startB
                   }}>
                     <Label style={{ width: '170px' }}>Grazing Fee Year:</Label>
                 <Select
-                onChange={handleGrazingYear}>
+                onChange={handleGrazingYear}
+                value={grazingYear}>
               {billYearOptions?.map(year =>
                           <Option
                           value={year.attributes.GRAZING_FEE_YEAR_TX
@@ -405,7 +423,8 @@ const BilledUse = ({ setFeatureForInspection, setStartInspection, styles, startB
               }}>
                 <Label style={{ width: '170px' }}>Billing Schedule Type Use: </Label>
                 <Select
-                onChange={handleScheduleType}>
+                onChange={handleScheduleType}
+                value={scheduleType}>
                   {billScheduleOptions?.map(year =>
                           <Option
                           value={year.attributes.USE_TYPE_NM
