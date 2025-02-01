@@ -23,6 +23,7 @@ const Main = ({ sharedState }) => {
                   placeholder="Select a state..."
                   style={{ width: '150px' }}
                   onChange={sharedState.handleStateChange}
+                  value={sharedState.stateSel}
                 >
                   <Option value="AZ">
                     Arizona
@@ -64,6 +65,7 @@ const Main = ({ sharedState }) => {
                 direction="down"
                 placeholder="Select a destination..."
                 onChange={sharedState.handleDistrictOfficeChange}
+                value={sharedState.districtOffice}
               >
                 <Option value={'Select a Distric'}>Select a District...</Option>
                 {sharedState.districtOptions?.map(district =>
@@ -82,6 +84,7 @@ const Main = ({ sharedState }) => {
               direction="down"
               placeholder="Select a destination..."
               onChange={sharedState.handleFieldOfficeChange}
+              value={sharedState.fieldOffice}
             >
                 <Option value={'Select a Office'}>Select a Office...</Option>
               {sharedState.officeOptions?.map(district =>

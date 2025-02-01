@@ -65,6 +65,11 @@ import SearchBar from "./searchbar";
   }, [])
 
   function handleRefresh () {
+    handleStateSel('')
+    handleDistrictOffice('')
+    setDistrictOptions([])
+    handleFieldOffice('')
+    setOfficeOptions([])
     setRefreshCount(0)
     setIsRefreshing(true)
   }
@@ -191,7 +196,6 @@ import SearchBar from "./searchbar";
     const DistrictLayerUrl = config.queryLayers.districtLayer
     const DistrictLayer = new FeatureLayer({ url: DistrictLayerUrl })
 
-    console.log(config)
     let query
     query = DistrictLayer.createQuery()
     query.where = `PARENT_NAME = '${district}'`
@@ -285,7 +289,6 @@ import SearchBar from "./searchbar";
     const OfficeLayerUrl = config.queryLayers.officeLayer
     const OfficeLayer = new FeatureLayer({ url: OfficeLayerUrl })
 
-    console.log(config)
     let query
     query = OfficeLayer.createQuery()
     query.where = `ADMIN_ST = '${stateSel}'`
@@ -324,7 +327,6 @@ import SearchBar from "./searchbar";
     const DistrictLayerUrl = config.queryLayers.districtLayer
     const DistrictLayer = new FeatureLayer({ url: DistrictLayerUrl })
 
-    console.log(config)
     let query
     query = DistrictLayer.createQuery()
     query.where = `ADMIN_ST = '${stateSel}'`
@@ -345,7 +347,6 @@ import SearchBar from "./searchbar";
     const stateLayerUrl = config.queryLayers.stateLayer
     const stateLayer = new FeatureLayer({ url: stateLayerUrl })
 
-    console.log(config)
     let query
     query = stateLayer.createQuery()
     query.where = `ADMIN_ST = '${stateSel}'`
