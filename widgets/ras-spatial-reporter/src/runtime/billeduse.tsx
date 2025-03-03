@@ -144,10 +144,6 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
     queryAllBillUsedRecords()
   }, [startBilled])
 
-  // useEffect(() => {
-  //   getAllBillUsedQueryString()
-  // }, [burro, cattle, goat, horse, sheep, yCattle, ind, grazingYear, scheduleType])
-
   function handleCheckBoxChange (checkboxid, checked) {
     if (checkboxid === 'burro') {
       setBurro(!burro)

@@ -1,10 +1,6 @@
 import { React, type AllWidgetProps } from 'jimu-core'
-import { useState, useEffect, useRef } from 'react'
-import { Checkbox, Label, Switch, TextInput, Button, ButtonGroup, Select, Option, CollapsablePanel, Radio } from 'jimu-ui'
-import { DatePicker } from 'jimu-ui/basic/date-picker'
-import { TableArrangeType } from 'dist/widgets/common/table/src/config'
-import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
-import config from '../configs/config.json'
+import { useState, useEffect } from 'react'
+import { Checkbox, Label, Select, Option, CollapsablePanel } from 'jimu-ui'
 
 const Allotments = ({ sharedState, styles }) => {
   const [allotmentValue, setAllotmentValue] = useState('')
@@ -12,7 +8,6 @@ const Allotments = ({ sharedState, styles }) => {
   const [allotAccept, setAllotAccept] = useState(false)
   const [allotReject, setAllotReject] = useState(false)
   const [allotReview, setAllotReview] = useState(false)
-
   const [outQueryStringAllotment, setOutQueryStringAllotment] = useState('')
 
   useEffect(() => {
@@ -37,18 +32,8 @@ const Allotments = ({ sharedState, styles }) => {
     }
   }
 
-
-  // useEffect(() => {
-  //   populateAllotment(office)
-  //   populateAllotmentGroup(office)
-  //   // populate allotments & group on office change
-  // }, [office])
-
-
-
   useEffect(() => {
     let outQueryStringAllotmentApp = ''
-    //check for approval flags
     if (allotAccept) {
       outQueryStringAllotmentApp = " ( APPROVAL_FLAG='Y' ) "
     }
@@ -145,9 +130,9 @@ const Allotments = ({ sharedState, styles }) => {
                  {sharedState.allotGroupList?.map(year =>
                           <Option
                           value={year.attributes.ALLOT_GRP_ID}>
-                              {year.attributes.ALLOT_GRP_ID + "-" + year.attributes.ALLOT_GRP_NM}
+                              {year.attributes.ALLOT_GRP_ID + '-' + year.attributes.ALLOT_GRP_NM}
                           </Option>
-              )}
+                 )}
                 </Select>
               </div>
               <div className="d-flex align-items-center" id="Allotments"

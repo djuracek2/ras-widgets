@@ -2,11 +2,11 @@ import { React, type AllWidgetProps } from "jimu-core";
 import { useState, useEffect, useRef } from 'react'
 import { Label, Switch } from 'jimu-ui'
 
-const Header = ({ toggleSwitch, isLoading, checked }) => {
+const Header = ({ toggleSwitch, isLoading, checked, totalRecords }) => {
   return (
     <>
         <Label centric className="d-flex">
-            Total Allotments Selected: 0
+            Total Allotments Selected: {totalRecords ? totalRecords : 0} 
         </Label>
         <h5>Please Select RAS Data Reports</h5>
         <div>

@@ -142,8 +142,10 @@ const Inspections = ({ sharedState, featureForInspection, startInspection, style
 
       InspectionQueryLayer.queryFeatures(query).then(function (result) {
         if (result.features.length > 0) {
-          const features = result.features
+          const features = result
           console.log('Inspection features:', features)
+          sharedState.setInspectionFeatures(features)
+          sharedState.setTriggerFeatureQuery(true)
           // setFeatureForInspection(features)
           // setStartInspection(true)
           // setBillScheduleOptions(features)

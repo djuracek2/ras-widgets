@@ -6,11 +6,7 @@
 import { React, type AllWidgetProps } from "jimu-core";
 import { type IMConfig } from "../config";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
-import { Checkbox, Label, Switch, TextInput, Button, ButtonGroup, Select, Option, CollapsablePanel, Radio, Loading } from "jimu-ui";
-import { DatePicker } from 'jimu-ui/basic/date-picker'
 import { useState, useEffect, useRef, useCallback } from 'react'
-import AcceptModal from './modals/acceptmodal'
-import RejectModal from './modals/rejectmodal'
 import Graphic from "@arcgis/core/Graphic"
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
 import { JimuFeatureLayerView, JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
@@ -29,13 +25,14 @@ import SearchBar from "./searchbar";
   const [stateOfficeQuery, setStateOfficeQuery] = useState('')
   const [districtOptions, setDistrictOptions] = useState([])
   const [officeOptions, setOfficeOptions] = useState([])
+  const [stateDisOffice, setStateDisOffice] = useState([])
   const graphicLayerRef = useRef<GraphicsLayer>(null)
+  const allotPolyLayer = useRef<GraphicsLayer>(null)
   const allotGraphicsLayer = useRef<GraphicsLayer>(null)
   const authGraphicsLayer = useRef<GraphicsLayer>(null)
   const billedGraphicsLayer = useRef<GraphicsLayer>(null)
   const inspGraphicsLayer = useRef<GraphicsLayer>(null)
 
-  
   const [allotment, setAllotmentNumber] = useState('')
   const [allotGroupList, setAllotGroupList] = useState([])
   const [allotList, setAllotList] = useState([])
@@ -47,17 +44,22 @@ import SearchBar from "./searchbar";
   const [isSearching, setIsSearching] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [refreshCount, setRefreshCount] = useState(0)
+  const [triggerFeatureQuery, setTriggerFeatureQuery] = useState(false)
+  const [inspectionFeatures, setInspectionFeatures] = useState([])
+  const [totalRecords, setTotalRecords] = useState(0)
   const totalChildren = 4
 
   useEffect(() => {
     if (sjmv && !graphicLayerRef.current) {
       const graphicsLayer = new GraphicsLayer()
+      allotPolyLayer.current = new GraphicsLayer()
       allotGraphicsLayer.current = new GraphicsLayer()
       authGraphicsLayer.current = new GraphicsLayer()
       billedGraphicsLayer.current = new GraphicsLayer()
       inspGraphicsLayer.current = new GraphicsLayer()
 
       sjmv.view.map.add(graphicsLayer)
+      sjmv.view.map.add(allotPolyLayer.current)
       sjmv.view.map.add(allotGraphicsLayer.current)
       sjmv.view.map.add(authGraphicsLayer.current)
       sjmv.view.map.add(billedGraphicsLayer.current)
@@ -65,6 +67,89 @@ import SearchBar from "./searchbar";
       graphicLayerRef.current = graphicsLayer
     }
   }, [sjmv])
+
+  useEffect(() => {
+    if (triggerFeatureQuery) {
+      queryAllotmentFeatures()
+    }
+  }, [triggerFeatureQuery])
+
+// params type and results
+ function queryAllotmentFeatures () {
+  setTriggerFeatureQuery(false)
+  let type = "AuthAuthority"
+  let results = inspectionFeatures
+    if (results.features.length > 0) {
+        let resultFeatures = results.features;
+        let graphic;
+
+        let queryString = "ST_ALLOT_NR in (";
+
+        if (type === "Livestock" || type === "AuthAuthority" || type === "Compliance" || type === "BilledUse") {
+          resultFeatures.forEach((feature) => {
+            queryString += "'" + feature.attributes.ST_ALLOT_NR + "',"
+          })
+        } else {
+          resultFeatures.forEach((feature) => {
+            queryString += "'" + feature.attributes.ST_ALLOT_NO + "',"
+          })
+        }
+
+        queryString = queryString.substring(0, queryString.length - 1) + ")";
+
+    const allotLayerUrl = config.queryLayers.allotmentPolyLayer
+    const allotLayer = new FeatureLayer({ url: allotLayerUrl })
+
+    let query
+    query = allotLayer.createQuery()
+    query.where = queryString
+    query.returnGeometry = true
+    query.outFields = ["ST_ALLOT_NR"];
+
+    allotLayer.queryFeatures(query).then(function (result) {
+      if (result.features.length > 0) {
+        console.log(result.features)
+        // const features = result.features[0]
+        const symbol = {
+          type: 'simple-fill', // autocasts as new SimpleFillSymbol()
+          color: [0, 204, 255, 0.1],
+          style: 'solid',
+          outline: {
+            color: [0, 204, 255, 0.8],
+            width: 1
+          }
+        }
+
+        if (graphicLayerRef.current) {
+          graphicLayerRef.current.removeAll()
+        } else {
+          console.error('Graphics layer not initialized.')
+        }
+
+      let graphic
+      result.features.forEach((feature) => {
+        graphic = new Graphic({
+          geometry: feature.geometry,
+          attributes: feature.attributes,
+          symbol: symbol
+        })
+        graphicLayerRef.current.add(graphic)
+      })
+
+      setTotalRecords(result.features.length)
+
+        // features.attributes.EMAIL_ID = 'Derek Test'
+        // if (sjmv) {
+        // sjmv.view.goTo({
+        //   target: result.features[0]
+        
+        // }).catch(function (error) {
+        //   console.log('Error querying feature service.')
+        // })
+      }
+    })
+  }
+}
 
   function runQuery () {
     console.log('query ran...')
@@ -139,27 +224,12 @@ import SearchBar from "./searchbar";
     setIsSearching,
     setIsRefreshing,
     isRefreshing,
-    handleChildRefresh
+    handleChildRefresh,
+    setTriggerFeatureQuery,
+    setInspectionFeatures
 
   }
 
-  const [formData, setFormData] = useState({
-    IdText: "",
-    officeText: "",
-    approvalMode: ""
-  })
-
-  const queryItems = [
-    {
-      field: 'ALLOT_GP_NM',
-      alias: 'Group Allot'
-    },
-    {
-      field: 'ALLOT_NM',
-      alias: 'Allotment'
-    }
-
-  ]
 
   const activeViewChangeHandler = (jmv: JimuMapView) => {
     if (jmv) {
@@ -182,7 +252,7 @@ import SearchBar from "./searchbar";
   // const featureLayerView = useRef<JimuFeatureLayerView>(null)
   // const clickHandler = useRef(null)
 
-  const toggleSwitch = () => isChecked(!checked)
+  const toggleSwitch = () => { isChecked(!checked); }
 
   const styles = {
     container: {
@@ -295,7 +365,6 @@ import SearchBar from "./searchbar";
     })
   }
 
-
   function zoomToOffice (office: string) {
     const OfficeLayerUrl = config.queryLayers.officeLayer
     const OfficeLayer = new FeatureLayer({ url: OfficeLayerUrl })
@@ -346,8 +415,6 @@ import SearchBar from "./searchbar";
     populateAllotmentGroup(office)
   }
 
-
-
   function queryOffice () {
     const OfficeLayerUrl = config.queryLayers.officeLayer
     const OfficeLayer = new FeatureLayer({ url: OfficeLayerUrl })
@@ -375,15 +442,68 @@ import SearchBar from "./searchbar";
 
   function getStateOfficeQuery () {
  //regional query
- let state_officeQuery = "";
-    if (stateSel !== "Select State" ) {
-        state_officeQuery = " ( ST_ALLOT_NR LIKE '" + stateSel + "%' )"
+ let stateOfficeQuery = "";
+    if (stateSel !== "Select State") {
+        stateOfficeQuery = " ( ST_ALLOT_NR LIKE '" + stateSel + "%' )"
     }
-    if (fieldOffice !== "0" && fieldOffice !== "" ) {
-        state_officeQuery = state_officeQuery + " And ( ADMIN_OFC_CD = '" + fieldOffice + "' )"
+    if (fieldOffice !== "0" && fieldOffice !== "") {
+        stateOfficeQuery = stateOfficeQuery + " And ( ADMIN_OFC_CD = '" + fieldOffice + "' ) "
     }
-    setStateOfficeQuery(state_officeQuery)
-    console.log(state_officeQuery)
+    setStateOfficeQuery(stateOfficeQuery)
+    queryStateDisOffice(stateOfficeQuery)
+    console.log(stateOfficeQuery)
+  }
+
+  function queryStateDisOffice (stateQuery) {
+    const AllotPolyLayerUrl = config.queryLayers.allotmentPolyLayer
+    const AllotPolyLayer = new FeatureLayer({ url: AllotPolyLayerUrl })
+
+    let query
+    query = AllotPolyLayer.createQuery()
+    query.where = stateQuery
+    query.returnGeometry = true
+    query.outFields = ['*']
+
+    AllotPolyLayer.queryFeatures(query).then(function (result) {
+      if (result.features.length > 0) {
+        const features = result.features[0]
+        const symbol = {
+          type: 'simple-fill', // autocasts as new SimpleFillSymbol()
+          color: [0, 204, 255, 0.4],
+          style: 'solid',
+          outline: {
+            color: [0, 204, 255, 0.8],
+            width: 2
+          }
+        }
+
+        const graphic = new Graphic({
+          geometry: features.geometry,
+          attributes: features.attributes,
+          symbol: symbol
+        })
+
+        if (allotPolyLayer.current) {
+          allotPolyLayer.current.removeAll()
+          allotPolyLayer.current.add(graphic)
+        } else {
+          console.error('Graphics layer not initialized.')
+        }
+        if (sjmv) {
+          sjmv.view.goTo({
+            target: result.features[0]
+          }).catch(function (error) {
+            console.log('Error querying feature service.')
+          })
+        }
+      }
+      // if (result.features.length > 0) {
+      //   console.log(result.features)
+      //   const features = result.features
+      //   console.log(features)
+      //   setStateDisOffice(features)
+      // }
+    })
   }
 
   function queryDistrict () {
@@ -473,7 +593,7 @@ import SearchBar from "./searchbar";
       query.returnGeometry = true
       query.outFields = ["*"]
 
-      featureLayerRef.current.queryFeatures(query).then(function(result) {
+      featureLayerRef.current.queryFeatures(query).then(function (result) {
         if (result.features.length > 0) {
           console.log(result.features)
           let features = result.features[0]
@@ -496,7 +616,7 @@ import SearchBar from "./searchbar";
         className='query-loader'
       >
       { isLoading &&
-   
+
         <Loading className="loader-overlay query-loader" type="SECONDARY" />
       }
       </div> */}

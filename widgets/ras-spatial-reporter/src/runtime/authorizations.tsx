@@ -229,7 +229,7 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
     }
 
     //DONT SEE THESE FIELDS IN CODE!!!
-    if (expTimeBeginConverter !== '' && expTimeEndConverter !== '') {
+    if ((expTimeBeginConverter !== '' && expTimeBeginConverter !== undefined) && (expTimeEndConverter !== '' && expTimeEndConverter !== undefined)) {
       if (queryDates === '') {
         queryDates = " (AUTH_EXP_DT >= TIMESTAMP '" + expTimeBeginConverter + "' AND AUTH_EXP_DT <= TIMESTAMP '" + expTimeEndConverter + "') "
       } else {
@@ -261,7 +261,6 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
     } else {
       setFeaturesForBilled('')
     }
-
     setStartBilled(true)
   }
 
@@ -440,15 +439,12 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
                 </div>
                 <div>
                 <Label>Effective Date:</Label>
-                    <div style={ styles.datetime}>
-
+                  <div style={ styles.datetime}>
                     <div
                       style={{
                         width: 200
                       }}
-
                     >
-
                       <DatePicker
                         aria-describedby="date-picker-desc-id"
                         aria-label="DateTime picker label"
@@ -476,9 +472,9 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
 
                     <Label style={{ display: 'flex', alignItems: 'center', padding: '5px', paddingTop: '10px' }}>between:</Label>
                   <div
-                        style={{
-                          width: 200
-                        }}
+                    style={{
+                      width: 200
+                    }}
                       >
                         <DatePicker
                           aria-describedby="date-picker-desc-id"

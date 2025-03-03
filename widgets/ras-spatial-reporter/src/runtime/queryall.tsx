@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-
 import Allotments from './allotments'
 import Authorizations from './authorizations'
 import BilledUse from './billeduse'
@@ -16,14 +15,6 @@ const QueryAll = ({ sharedState, styles, stateSel, districtOffice, fieldOffice }
   const [startBilled, setStartBilled] = useState(false)
   const [startInspection, setStartInspection] = useState(false)
 
-  //   var queryAuthLiveStockString = "";
-  //   var queryStringAuthorizationAuth="";
-  //   var qryReportViewAuthAllotmentString;
-
-  //   qryReportViewAuthAllotmentString = this._getAllotmentReviewStatus();
-  //   queryAuthLiveStockString =  this._getAuthLiveStockQuery();
-  //   queryStringAuthorizationAuth = this._getAuthAuthorityQuery();
-  //   var queryDates = this._getAuthorityDatesQuery();
   useEffect(() => {
     let reportViewString = sharedState.stateOfficeQuery
 
