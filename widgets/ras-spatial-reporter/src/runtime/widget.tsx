@@ -447,7 +447,7 @@ import SearchBar from "./searchbar";
         stateOfficeQuery = " ( ST_ALLOT_NR LIKE '" + stateSel + "%' )"
     }
     if (fieldOffice !== "0" && fieldOffice !== "") {
-        stateOfficeQuery = stateOfficeQuery + " And ( ADMIN_OFC_CD = '" + fieldOffice + "' ) "
+        stateOfficeQuery = stateOfficeQuery + " And ( ADMIN_UNIT_CD = '" + fieldOffice + "' ) "
     }
     setStateOfficeQuery(stateOfficeQuery)
     queryStateDisOffice(stateOfficeQuery)
@@ -466,6 +466,7 @@ import SearchBar from "./searchbar";
 
     AllotPolyLayer.queryFeatures(query).then(function (result) {
       if (result.features.length > 0) {
+        console.log(result.features)
         const features = result.features[0]
         const symbol = {
           type: 'simple-fill', // autocasts as new SimpleFillSymbol()
@@ -477,21 +478,26 @@ import SearchBar from "./searchbar";
           }
         }
 
-        const graphic = new Graphic({
-          geometry: features.geometry,
-          attributes: features.attributes,
-          symbol: symbol
-        })
+        let graphic
 
         if (allotPolyLayer.current) {
+          graphicLayerRef.current.removeAll()
           allotPolyLayer.current.removeAll()
-          allotPolyLayer.current.add(graphic)
+          result.features.forEach((feature) => {
+            graphic = new Graphic({
+              geometry: feature.geometry,
+              attributes: feature.attributes,
+              symbol: symbol
+            })
+            graphicLayerRef.current.add(graphic)
+          })
+          // allotPolyLayer.current.add(graphic)
         } else {
           console.error('Graphics layer not initialized.')
         }
         if (sjmv) {
           sjmv.view.goTo({
-            target: result.features[0]
+            target: result.features
           }).catch(function (error) {
             console.log('Error querying feature service.')
           })
