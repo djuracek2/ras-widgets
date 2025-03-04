@@ -9,7 +9,7 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Graphic from "@arcgis/core/Graphic"
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
-import { JimuFeatureLayerView, JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
+import { JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
 import Main from "./main";
 import Header from "./header";
 import config from '../configs/config.json'
@@ -27,11 +27,11 @@ import SearchBar from "./searchbar";
   const [officeOptions, setOfficeOptions] = useState([])
   const [stateDisOffice, setStateDisOffice] = useState([])
   const graphicLayerRef = useRef<GraphicsLayer>(null)
-  const allotPolyLayer = useRef<GraphicsLayer>(null)
-  const allotGraphicsLayer = useRef<GraphicsLayer>(null)
-  const authGraphicsLayer = useRef<GraphicsLayer>(null)
-  const billedGraphicsLayer = useRef<GraphicsLayer>(null)
-  const inspGraphicsLayer = useRef<GraphicsLayer>(null)
+  const regionalPolyGraphics = useRef<GraphicsLayer>(null)
+  const allotmentGraphics = useRef<GraphicsLayer>(null)
+  const authGraphics = useRef<GraphicsLayer>(null)
+  const billedGraphics = useRef<GraphicsLayer>(null)
+  const inspectionGraphics = useRef<GraphicsLayer>(null)
 
   const [allotment, setAllotmentNumber] = useState('')
   const [allotGroupList, setAllotGroupList] = useState([])
@@ -45,36 +45,106 @@ import SearchBar from "./searchbar";
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [refreshCount, setRefreshCount] = useState(0)
   const [triggerFeatureQuery, setTriggerFeatureQuery] = useState(false)
+
+  const [regionalFeatures, setRegionalFeatures] = useState([])
+  const [allotmentFeatures, setAllotmentFeatures] = useState([])
+  const [authorizationFeatures, setAuthorizationFeatures] = useState([])
+  const [billedUseFeatures, setBilledUseFeatures] = useState([])
   const [inspectionFeatures, setInspectionFeatures] = useState([])
+
   const [totalRecords, setTotalRecords] = useState(0)
   const totalChildren = 4
 
   useEffect(() => {
     if (sjmv && !graphicLayerRef.current) {
       const graphicsLayer = new GraphicsLayer()
-      allotPolyLayer.current = new GraphicsLayer()
-      allotGraphicsLayer.current = new GraphicsLayer()
-      authGraphicsLayer.current = new GraphicsLayer()
-      billedGraphicsLayer.current = new GraphicsLayer()
-      inspGraphicsLayer.current = new GraphicsLayer()
+      regionalPolyGraphics.current = new GraphicsLayer()
+      allotmentGraphics.current = new GraphicsLayer()
+      authGraphics.current = new GraphicsLayer()
+      billedGraphics.current = new GraphicsLayer()
+      inspectionGraphics.current = new GraphicsLayer()
 
       sjmv.view.map.add(graphicsLayer)
-      sjmv.view.map.add(allotPolyLayer.current)
-      sjmv.view.map.add(allotGraphicsLayer.current)
-      sjmv.view.map.add(authGraphicsLayer.current)
-      sjmv.view.map.add(billedGraphicsLayer.current)
-      sjmv.view.map.add(inspGraphicsLayer.current)
+      sjmv.view.map.add(regionalPolyGraphics.current)
+      sjmv.view.map.add(allotmentGraphics.current)
+      sjmv.view.map.add(authGraphics.current)
+      sjmv.view.map.add(billedGraphics.current)
+      sjmv.view.map.add(inspectionGraphics.current)
       graphicLayerRef.current = graphicsLayer
     }
   }, [sjmv])
 
   useEffect(() => {
     if (triggerFeatureQuery) {
-      queryAllotmentFeatures()
+      const allFeatures = ['regional', 'allotment', 'authorization', 'billedUse', 'inspection']
+
+      allFeatures.forEach((type) => {
+        queryAllAllotmentFeatures(type)
+      })
     }
   }, [triggerFeatureQuery])
 
+  function buildGraphics (color, outline, graphicLayer, features) {
+    const symbol = {
+      type: 'simple-fill', // autocasts as new SimpleFillSymbol()
+      color: color,
+      style: 'solid',
+      outline: {
+        color: outline,
+        width: 1
+      }
+    }
+
+    if (graphicLayer) {
+      graphicLayer.removeAll()
+    } else {
+      console.error('Graphics layer not initialized.')
+    }
+
+  let graphic
+  features.forEach((feature) => {
+    graphic = new Graphic({
+      geometry: feature.geometry,
+      attributes: feature.attributes,
+      symbol: symbol
+    })
+   graphicLayer.add(graphic)
+   console.log(graphicLayer, 'added graphics')
+  })
+  }
+
+  function queryAllAllotmentFeatures (type) {
+    if (type === 'regional') {
+      if (regionalFeatures?.length > 0) {
+        // red
+        buildGraphics([255, 0, 0, 0.1], [139, 0, 0, 0.2], regionalPolyGraphics.current, regionalFeatures)
+      }
+    } else if (type === 'allotment') {
+      if (allotmentFeatures.length > 0) {
+         // green
+        buildGraphics([0, 255, 0, 0.1], [0, 100, 0, 0.2], allotmentGraphics.current, allotmentFeatures)
+      }
+    } else if (type === 'authorization') {
+      if (authorizationFeatures.length > 0) {
+        // orange
+        buildGraphics([255, 165, 0, 0.1], [200, 100, 0, 0.2], authGraphics.current, authorizationFeatures)
+      }
+    } else if (type === 'billedUse') {
+      if (billedUseFeatures.length > 0) {
+        // blue
+        buildGraphics([0, 0, 255, 0.1], [0, 0, 139, 0.2], billedGraphics.current, billedUseFeatures)
+      }
+    } else if (type === 'inspection') {
+      if (inspectionFeatures?.length > 0) {
+        // yellow
+      buildGraphics([255, 255, 0, 0.1], [204, 204, 0, 0.2], inspectionGraphics.current, inspectionFeatures)
+      }
+    }
+  }
+
 // params type and results
+// add all results for all searches here
+// ALL GRAPHICS LOOP
  function queryAllotmentFeatures () {
   setTriggerFeatureQuery(false)
   let type = "AuthAuthority"
@@ -135,18 +205,8 @@ import SearchBar from "./searchbar";
         })
         graphicLayerRef.current.add(graphic)
       })
-
       setTotalRecords(result.features.length)
-
-        // features.attributes.EMAIL_ID = 'Derek Test'
-        // if (sjmv) {
-        // sjmv.view.goTo({
-        //   target: result.features[0]
-        
-        // }).catch(function (error) {
-        //   console.log('Error querying feature service.')
-        // })
-      }
+    }
     })
   }
 }
@@ -175,6 +235,14 @@ import SearchBar from "./searchbar";
     setAllotList([])
     setRefreshCount(0)
     setIsRefreshing(true)
+    isChecked(false)
+    // setIsLoading(true)
+    graphicLayerRef.current.removeAll()
+    regionalPolyGraphics.current.removeAll()
+    allotmentGraphics.current.removeAll()
+    authGraphics.current.removeAll()
+    billedGraphics.current.removeAll()
+    inspectionGraphics.current.removeAll()
   }
 
   function handleCancel () {
@@ -183,23 +251,18 @@ import SearchBar from "./searchbar";
 
   const handleStateChange = (event) => {
     handleStateSel(event.target.value)
-    console.log(stateSel)
   }
 
   const handleDistrictOfficeChange = (event) => {
     const district = event.target.value
     handleDistrictOffice(event.target.value)
     zoomToDistrict(district)
-    // queryOffice()
-
-    console.log(districtOffice)
   }
 
   const handleFieldOfficeChange = (event) => {
     const office = event.target.value
     handleFieldOffice(office)
     zoomToOffice(office)
-    console.log(fieldOffice)
   }
 
   const sharedState = {
@@ -226,10 +289,12 @@ import SearchBar from "./searchbar";
     isRefreshing,
     handleChildRefresh,
     setTriggerFeatureQuery,
-    setInspectionFeatures
+    setInspectionFeatures,
+    setAuthorizationFeatures,
+    setAllotmentFeatures,
+    setBilledUseFeatures
 
   }
-
 
   const activeViewChangeHandler = (jmv: JimuMapView) => {
     if (jmv) {
@@ -247,10 +312,6 @@ import SearchBar from "./searchbar";
       }
     }
   }
-
-  // const graphicLayerRef = useRef<GraphicsLayer>(null)
-  // const featureLayerView = useRef<JimuFeatureLayerView>(null)
-  // const clickHandler = useRef(null)
 
   const toggleSwitch = () => { isChecked(!checked); }
 
@@ -341,16 +402,19 @@ import SearchBar from "./searchbar";
 
     allotPolyLayer.queryFeatures(query).then(function (response) {
       const features = response.features
-      setAllotList(features)
+
+      if (features.length > 0) {
+        let uniqueFeats = new Set(features)
+        let arr = [...uniqueFeats]
+        setAllotList(arr)
+      }
     })
   }
 
   function populateAllotmentGroup (office: string) {
-    console.log(office)
     const allotTable = new FeatureLayer({
       url: config.queryLayers.allotmentGroupTable
     })
-    console.log(allotTable)
 
     let query = allotTable.createQuery()
     //ADMIN_OFC_CD = 'LLCOS00000'
@@ -361,7 +425,11 @@ import SearchBar from "./searchbar";
 
     allotTable.queryFeatures(query).then(function (response) {
       const features = response.features
-      setAllotGroupList(features)
+      if (features.length > 0) {
+        let uniqueFeats = new Set(features)
+        let arr = [...uniqueFeats]
+        setAllotGroupList(arr)
+      }
     })
   }
 
@@ -369,7 +437,6 @@ import SearchBar from "./searchbar";
     const OfficeLayerUrl = config.queryLayers.officeLayer
     const OfficeLayer = new FeatureLayer({ url: OfficeLayerUrl })
 
-    console.log(config)
     let query
     query = OfficeLayer.createQuery()
     query.where = `ADM_UNIT_CD = '${office}'`
@@ -427,9 +494,7 @@ import SearchBar from "./searchbar";
 
     OfficeLayer.queryFeatures(query).then(function (result) {
       if (result.features.length > 0) {
-        console.log(result.features)
         const features = result.features
-        console.log(features)
         setOfficeOptions(features)
       }
     })
@@ -450,8 +515,9 @@ import SearchBar from "./searchbar";
         stateOfficeQuery = stateOfficeQuery + " And ( ADMIN_UNIT_CD = '" + fieldOffice + "' ) "
     }
     setStateOfficeQuery(stateOfficeQuery)
-    queryStateDisOffice(stateOfficeQuery)
-    console.log(stateOfficeQuery)
+    if (stateSel?.length > 0 && fieldOffice?.length > 0) {
+      queryStateDisOffice(stateOfficeQuery)
+    }
   }
 
   function queryStateDisOffice (stateQuery) {
@@ -466,6 +532,7 @@ import SearchBar from "./searchbar";
 
     AllotPolyLayer.queryFeatures(query).then(function (result) {
       if (result.features.length > 0) {
+        setRegionalFeatures(result.features)
         console.log(result.features)
         const features = result.features[0]
         const symbol = {
@@ -480,9 +547,9 @@ import SearchBar from "./searchbar";
 
         let graphic
 
-        if (allotPolyLayer.current) {
+        if (regionalPolyGraphics.current) {
           graphicLayerRef.current.removeAll()
-          allotPolyLayer.current.removeAll()
+          regionalPolyGraphics.current.removeAll()
           result.features.forEach((feature) => {
             graphic = new Graphic({
               geometry: feature.geometry,
@@ -491,7 +558,7 @@ import SearchBar from "./searchbar";
             })
             graphicLayerRef.current.add(graphic)
           })
-          // allotPolyLayer.current.add(graphic)
+          // regionalPolyGraphics.current.add(graphic)
         } else {
           console.error('Graphics layer not initialized.')
         }
@@ -503,12 +570,6 @@ import SearchBar from "./searchbar";
           })
         }
       }
-      // if (result.features.length > 0) {
-      //   console.log(result.features)
-      //   const features = result.features
-      //   console.log(features)
-      //   setStateDisOffice(features)
-      // }
     })
   }
 
@@ -568,8 +629,6 @@ import SearchBar from "./searchbar";
         } else {
           console.error('Graphics layer not initialized.')
         }
-        // features.attributes.EMAIL_ID = 'Derek Test'
-        // if (sjmv) {
         sjmv.view.goTo({
           target: result.features[0]
           // zoom: 16

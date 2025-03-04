@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { React, type AllWidgetProps } from 'jimu-core'
 import { useState, useEffect } from 'react'
 import { Checkbox, Label, Select, Option, CollapsablePanel } from 'jimu-ui'
@@ -35,7 +36,6 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
       sharedState.handleChildRefresh()
     }
   }, [sharedState.isRefreshing])
-
 
   function handleGrazingYear (event) {
     setGrazingYear(event.target.value)
@@ -83,9 +83,9 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
     BillSchedLayer.queryFeatures(query).then(function (result) {
       if (result.features.length > 0) {
         const features = result.features
-        console.log(features)
+        // console.log(features)
         setBillScheduleOptions(features)
-        console.log(features)
+        // console.log(features)
       }
     })
   }
@@ -114,7 +114,7 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
           billUseAllQuery = queryAuthString
         }
       }
-      console.log(billUseAllQuery)
+      // console.log(billUseAllQuery)
       if (billUseAllQuery !== '') {
         const BillQueryLayerUrl = config.queryLayers.RasReportBillUsedVW
         const BillQueryLayer = new FeatureLayer({ url: BillQueryLayerUrl })
@@ -126,13 +126,14 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
         query.returnDistinctValues = true
         query.outSpatialReference = new SpatialReference({ wkid: 3857 })
         query.outFields = ['ST_ALLOT_NR']
-        console.log(query)
+        // console.log(query)
 
         BillQueryLayer.queryFeatures(query).then(function (result) {
           if (result.features.length > 0) {
             const features = result.features
             console.log('billed use features:', features)
             setFeatureForInspection(features)
+            sharedState.setBilledUseFeatures(features)
             setStartInspection(true)
           }
         })
@@ -221,7 +222,7 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
     }
     setBilledUseString(outString)
 
-    console.log('billed use query string is:', outString)
+    // console.log('billed use query string is:', outString)
     return outString
   }
   // reaplce with grazing year value selection
@@ -247,10 +248,10 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
   }
 
   function getAllBillUsedQueryString () {
-    let queryStringforBillUsedLiveStock = getQueryChkBoxForBillUse()
+    const queryStringforBillUsedLiveStock = getQueryChkBoxForBillUse()
     let billUseAllQuery = queryStringforBillUsedLiveStock
 
-    let queryStringforBillUsedGrazingYear = getQueryGrazingYearDD()
+    const queryStringforBillUsedGrazingYear = getQueryGrazingYearDD()
 
     if (billUseAllQuery !== '' && queryStringforBillUsedGrazingYear !== '') {
       billUseAllQuery = billUseAllQuery + '  AND ' + queryStringforBillUsedGrazingYear
@@ -260,7 +261,7 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
       }
     }
 
-    let queryStringforBillUsedTypeUse = getQueryScheduleTypeDD()
+    const queryStringforBillUsedTypeUse = getQueryScheduleTypeDD()
     if (billUseAllQuery !== '' && queryStringforBillUsedTypeUse !== '') {
       billUseAllQuery = billUseAllQuery + '  AND ' + queryStringforBillUsedTypeUse
     } else {
@@ -269,7 +270,6 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
       }
     }
     setBilledUseFinalQuery(billUseAllQuery)
-    console.log(billUseAllQuery)
     return billUseAllQuery
   }
 

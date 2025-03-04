@@ -76,17 +76,14 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
     } else {
       setExpEnd(val)
       setExpTimeEndConverter(transformDate(val))
-      console.log(expEnd)
     }
   }
 
   function handleIssueDate (type, val) {
     if (type === 'begin') {
       setIssBegin(val)
-      console.log(issBegin)
     } else {
       setIssEnd(val)
-      console.log(issEnd)
     }
   }
 
@@ -170,7 +167,6 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
 
     if (outString !== '') { outString = outString + ' ) ' }
     setQueryAuthLiveStockString(outString)
-    console.log('1st part of query string is:', outString)
   }
 
   useEffect(() => {
@@ -217,14 +213,13 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
       queryStringAuthorizationAuth = queryStringAuthorizationAuth + ' ) '
     }
     setQueryStringAuthorizationAuth(queryStringAuthorizationAuth)
-    console.log('2nd part of query string is:', queryStringAuthorizationAuth)
   }
 
   function getAuthorityDatesQuery () {
     let queryDates = ''
     // Not adding issue mng for now as its coded out
     // check if still needed in ui
-    if (effBeginTimeConverter !== '' && effTimeEndConverter !== '') {
+    if ((effBeginTimeConverter !== '' && effTimeEndConverter !== '') && (effBeginTimeConverter !== undefined && effTimeEndConverter !== undefined)) {
       queryDates = " (AUTH_EFT_DT >= TIMESTAMP '" + effBeginTimeConverter + "' AND AUTH_EFT_DT <= TIMESTAMP '" + effTimeEndConverter + "') "
     }
 
@@ -237,8 +232,6 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
       }
     }
     setQueryDates(queryDates)
-   
-    console.log('3rd part of query string is:', queryDates)
   }
 
   function queryAuthAuthority (qryReportViewAuthAllotmentString: string) {
@@ -254,7 +247,8 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
       RasAuthLayer.queryFeatures(query).then(function (result) {
         if (result) {
           const features = result.features
-          console.log(features)
+          console.log('authorization feautures are:', features)
+          sharedState.setAuthorizationFeatures(features)
           setFeaturesForBilled(features)
         }
       })
@@ -268,7 +262,6 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
     <>
        <CollapsablePanel
             label="Authorizations"
-
             level={0}
             type="default"
             style={{
@@ -542,51 +535,6 @@ const Authorizations = ({ setNoDatesTrigger, setStartBilled, setFeaturesForBille
                     </div>
                   </div>
                 </div>
-
-                {/* <div>
-                <Label>Issue/Mgr. Signature Date::</Label>
-                    <div style={ styles.datetime}>
-                    <div
-                      style={{
-                        width: 150
-                      }}
-                    >
-                      <DatePicker
-                        aria-describedby="date-picker-desc-id"
-                        aria-label="DateTime picker label"
-                        format="shortDateLongTime"
-                        onChange={(val) => { handleIssueDate('begin', val) }}
-                        // selectedDate={new Date("2022-07-30T06:00:00.000Z")}
-                        showDoneButton
-                        strategy="absolute"
-                        virtualDateList={[
-                          'NOW',
-                          'YESTERDAY'
-                        ]}
-                      />
-                    </div>
-                    <Label style={{ display: 'flex', alignItems: 'center', padding: '5px', paddingTop: '10px' }}>between:</Label>
-                  <div
-                        style={{
-                          width: 150
-                        }}
-                      >
-                        <DatePicker
-                          aria-describedby="date-picker-desc-id"
-                          aria-label="DateTime picker label"
-                          format="shortDateLongTime"
-                          onChange={(val) => { handleIssueDate('end', val) }}
-                          showDoneButton
-                          strategy="absolute"
-                          virtualDateList={[
-                            'NOW',
-                            'YESTERDAY'
-                          ]}
-                        />
-                    </div>
-                  </div>
-                </div> */}
-
             </div>
           </CollapsablePanel>
           </>

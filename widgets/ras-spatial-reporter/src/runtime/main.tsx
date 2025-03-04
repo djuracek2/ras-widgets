@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { React, type AllWidgetProps } from 'jimu-core'
+import { React } from 'jimu-core'
 import { Label, Select, Option } from 'jimu-ui'
 import SearchBar from './searchbar'
 

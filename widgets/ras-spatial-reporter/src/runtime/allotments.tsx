@@ -1,5 +1,9 @@
-import { React, type AllWidgetProps } from 'jimu-core'
+/* eslint-disable prefer-const */
+/* eslint-disable react-hooks/exhaustive-deps */
+import { React } from 'jimu-core'
+import config from '../configs/config.json'
 import { useState, useEffect } from 'react'
+import FeatureLayer from '@arcgis/core/layers/FeatureLayer'
 import { Checkbox, Label, Select, Option, CollapsablePanel } from 'jimu-ui'
 
 const Allotments = ({ sharedState, styles }) => {
@@ -21,8 +25,7 @@ const Allotments = ({ sharedState, styles }) => {
     }
   }, [sharedState.isRefreshing])
 
-  function handleCheckBoxChange (checkboxid, checked) {
-    console.log(checkboxid, checked)
+  function handleCheckBoxChange (checkboxid) {
     if (checkboxid === 'allot-accept') {
       setAllotAccept(!allotAccept)
     } else if (checkboxid === 'allot-reject') {
@@ -34,28 +37,69 @@ const Allotments = ({ sharedState, styles }) => {
 
   useEffect(() => {
     let outQueryStringAllotmentApp = ''
-    if (allotAccept) {
+    if (allotAccept && !allotReject && !allotReview) {
       outQueryStringAllotmentApp = " ( APPROVAL_FLAG='Y' ) "
     }
 
-    if (allotReject) {
-      if (outQueryStringAllotmentApp !== '') {
-        outQueryStringAllotmentApp = '( ' + " APPROVAL_FLAG='Y' " + " OR APPROVAL_FLAG='Y' ) "
-      } else {
-        outQueryStringAllotmentApp = " ( APPROVAL_FLAG='N' )"
+    if (!allotAccept && allotReject && !allotReview) {
+      outQueryStringAllotmentApp = " ( APPROVAL_FLAG='N' ) "
+    }
+
+    if (!allotAccept && !allotReject && allotReview) {
+      outQueryStringAllotmentApp = ' ( APPROVAL_FLAG is null ) '
+    }
+
+    if (allotAccept && allotReject && !allotReview) {
+      outQueryStringAllotmentApp = "( APPROVAL_FLAG='Y' OR APPROVAL_FLAG='Y' ) "
+    }
+
+    if (!allotAccept && allotReject && allotReview) {
+      outQueryStringAllotmentApp = "( APPROVAL_FLAG='N' OR APPROVAL_FLAG is null ) "
+    }
+
+    if (allotAccept && !allotReject && allotReview) {
+      outQueryStringAllotmentApp = "( APPROVAL_FLAG='Y' OR APPROVAL_FLAG is null ) "
+    }
+
+    if (allotAccept && allotReject && allotReview) {
+      outQueryStringAllotmentApp = '( ' + " APPROVAL_FLAG='Y' OR APPROVAL_FLAG='Y' OR APPROVAL_FLAG is null  ) "
+    }
+
+    setOutQueryStringAllotment(outQueryStringAllotmentApp)
+  }, [allotAccept, allotReject, allotReview])
+
+  useEffect(() => {
+    if (sharedState.isSearching) {
+      if (outQueryStringAllotment.length > 0) {
+        populateAllotmentFeatures(outQueryStringAllotment)
       }
     }
-    setOutQueryStringAllotment(outQueryStringAllotmentApp)
-  }, [allotAccept, allotReject])
+  }, [sharedState.isSearching])
+
+  function populateAllotmentFeatures (queryString) {
+    const allotLayerUrl = config.queryLayers.allotmentPolyLayer
+    const allotLayer = new FeatureLayer({ url: allotLayerUrl })
+
+    let query
+    query = allotLayer.createQuery()
+    query.where = queryString
+    query.returnGeometry = true
+    query.outFields = ['*']
+
+    allotLayer.queryFeatures(query).then(function (result) {
+      if (result.features.length > 0) {
+        console.log('allotment features', result.features)
+        sharedState.setAllotmentFeatures(result.features)
+      }
+    })
+  }
 
   function handleAllotmentSelect (event) {
     setAllotmentValue(event.target.value)
-    console.log(allotmentValue)
   }
 
   function handleAllotGroupSelect (event) {
     setAllotGroupValue(event.target.value)
-    console.log(allotGroupValue)
   }
   return (
     <>
@@ -128,10 +172,10 @@ const Allotments = ({ sharedState, styles }) => {
                 onChange={handleAllotGroupSelect}
                 value={allotGroupValue}>
                  {sharedState.allotGroupList?.map(year =>
-                          <Option
-                          value={year.attributes.ALLOT_GRP_ID}>
-                              {year.attributes.ALLOT_GRP_ID + '-' + year.attributes.ALLOT_GRP_NM}
-                          </Option>
+                    <Option
+                    value={year.attributes.ALLOT_GRP_IDALLOT_GRP_ID}>
+                        {year.attributes.ALLOT_GRP_ID + '-' + year.attributes.ALLOT_GRP_NM}
+                    </Option>
                  )}
                 </Select>
               </div>
@@ -147,9 +191,9 @@ const Allotments = ({ sharedState, styles }) => {
                   {sharedState.allotList?.map(year =>
                     <Option
                     value={year.attributes.ST_ALLOT_NR}>
-                        {year.attributes.ST_ALLOT_NR + "-" + year.attributes.ALLOT_NM}
+                        {year.attributes.ST_ALLOT_NR + '-' + year.attributes.ALLOT_NM}
                     </Option>
-        )}
+                  )}
                 </Select>
               </div>
               <div className="d-flex align-items-center" style={{ paddingTop: '5px' }}>

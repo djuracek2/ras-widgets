@@ -72,7 +72,7 @@ const Inspections = ({ sharedState, featureForInspection, startInspection, style
 
   // get date values
   function getQueryComplianceDate () {
-    if (beginTimeConverter !== '' && endTimeConverter !== '') {
+    if ((beginTimeConverter !== '' && endTimeConverter !== '') && (beginTimeConverter !== undefined && endTimeConverter !== undefined)) {
       return " ( INSPECTION_DT >= TIMESTAMP '" + beginTimeConverter + "' AND INSPECTION_DT <= TIMESTAMP '" + endTimeConverter + "' ) "
     }
   }
@@ -130,26 +130,20 @@ const Inspections = ({ sharedState, featureForInspection, startInspection, style
 
       // ( INSPECTION_DT >= 1421910000000 AND INSPECTION_DT <= 1738134000000 )  AND ( OOC_CD = 'Y'  ) AND ST_ALLOT_NR in ('AZ06005','CA04329','CA04379','CO04213','CO04215','CO04542','WY10524','WY10613','WY10620')
 
-      console.log()
       let query
       query = InspectionQueryLayer.createQuery()
       query.where = allComplainceQuery
-      query.returnGeometry = false
-      query.returnDistinctValues = true
+      query.returnGeometry = true
+
       query.outSpatialReference = new SpatialReference({ wkid: 3857 })
-      query.outFields = ['ST_ALLOT_NR']
-      console.log(query)
+      query.outFields = ['*']
 
       InspectionQueryLayer.queryFeatures(query).then(function (result) {
         if (result.features.length > 0) {
           const features = result
-          console.log('Inspection features:', features)
+          // console.log('Inspection features:', features)
           sharedState.setInspectionFeatures(features)
           sharedState.setTriggerFeatureQuery(true)
-          // setFeatureForInspection(features)
-          // setStartInspection(true)
-          // setBillScheduleOptions(features)
-          // console.log(features)
         }
       })
     }
