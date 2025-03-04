@@ -293,7 +293,6 @@ import SearchBar from "./searchbar";
     setAuthorizationFeatures,
     setAllotmentFeatures,
     setBilledUseFeatures
-
   }
 
   const activeViewChangeHandler = (jmv: JimuMapView) => {
@@ -303,9 +302,9 @@ import SearchBar from "./searchbar";
 
       console.log(jmv)
       jmv.view.popupEnabled = false
-      jmv.view.on("click", (event) => {
-        event.stopPropagation()
-      })
+      // jmv.view.on("click", (event) => {
+      //   event.stopPropagation()
+      // })
 
       if (jmv) {
         setIsLoading(false)
