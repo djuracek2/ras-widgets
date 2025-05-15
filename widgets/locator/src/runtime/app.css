@@ -1,0 +1,18 @@
+.app-root-emotion-cache-ltr-1s2xfmp {
+    border-radius: 3px !important;
+}
+
+body {
+    color: white;
+}
+
+.widget-demo {
+    overflow-y: auto !important;
+    max-height: 600px !important;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.div-body {
+    margin: 10px !important;
+}

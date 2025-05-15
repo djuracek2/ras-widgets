@@ -694,7 +694,9 @@ import SearchBar from "./searchbar";
       </div>
       <div
           style={{
-            width: '90%'
+            width: '90%',
+            overflowY: 'scroll',
+            maxHeight: '300px'
           }}
         >
           <QueryAll sharedState={sharedState} styles={styles} stateSel={stateSel} districtOffice={districtOffice} office={fieldOffice}>
