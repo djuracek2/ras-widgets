@@ -109,7 +109,7 @@ import SearchBar from "./searchbar";
       symbol: symbol
     })
    graphicLayer.add(graphic)
-   console.log(graphicLayer, 'added graphics')
+  //  console.log(graphicLayer, 'added graphics')
   })
   }
 

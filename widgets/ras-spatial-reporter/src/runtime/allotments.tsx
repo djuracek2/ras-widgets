@@ -38,35 +38,53 @@ const Allotments = ({ sharedState, styles }) => {
   useEffect(() => {
     let outQueryStringAllotmentApp = ''
     if (allotAccept && !allotReject && !allotReview) {
-      outQueryStringAllotmentApp = " ( APPROVAL_FLAG='Y' ) "
+      outQueryStringAllotmentApp = " ( APPROVAL_FLAG='Y' "
     }
 
     if (!allotAccept && allotReject && !allotReview) {
-      outQueryStringAllotmentApp = " ( APPROVAL_FLAG='N' ) "
+      outQueryStringAllotmentApp = " ( APPROVAL_FLAG='N' "
     }
 
     if (!allotAccept && !allotReject && allotReview) {
-      outQueryStringAllotmentApp = ' ( APPROVAL_FLAG is null ) '
+      outQueryStringAllotmentApp = ' ( APPROVAL_FLAG is null '
     }
 
     if (allotAccept && allotReject && !allotReview) {
-      outQueryStringAllotmentApp = "( APPROVAL_FLAG='Y' OR APPROVAL_FLAG='Y' ) "
+      outQueryStringAllotmentApp = "( APPROVAL_FLAG='Y' OR APPROVAL_FLAG='Y' "
     }
 
     if (!allotAccept && allotReject && allotReview) {
-      outQueryStringAllotmentApp = "( APPROVAL_FLAG='N' OR APPROVAL_FLAG is null ) "
+      outQueryStringAllotmentApp = "( APPROVAL_FLAG='N' OR APPROVAL_FLAG is null "
     }
 
     if (allotAccept && !allotReject && allotReview) {
-      outQueryStringAllotmentApp = "( APPROVAL_FLAG='Y' OR APPROVAL_FLAG is null ) "
+      outQueryStringAllotmentApp = "( APPROVAL_FLAG='Y' OR APPROVAL_FLAG is null "
     }
 
     if (allotAccept && allotReject && allotReview) {
-      outQueryStringAllotmentApp = '( ' + " APPROVAL_FLAG='Y' OR APPROVAL_FLAG='Y' OR APPROVAL_FLAG is null  ) "
+      outQueryStringAllotmentApp = '( ' + " APPROVAL_FLAG='Y' OR APPROVAL_FLAG='Y' OR APPROVAL_FLAG is null  "
     }
 
+    if (allotmentValue) {
+      if (!allotAccept && !allotReject && !allotReview && allotmentValue) {
+        outQueryStringAllotmentApp += `( ALLOT_GRP_ID = '${allotmentValue}'`
+      } else {
+        outQueryStringAllotmentApp += ` AND ALLOT_GRP_ID = '${allotmentValue}'`
+      }
+    }
+
+    if (allotGroupValue) {
+      if (!allotAccept && !allotReject && !allotReview && !allotmentValue && allotGroupValue) {
+        outQueryStringAllotmentApp += `( ALLOT_GRP_NUM = '${allotmentValue}'`
+      } else {
+        outQueryStringAllotmentApp += ` AND ALLOT_GRP_NUM = '${allotmentValue}'`
+      }
+    }
+
+    outQueryStringAllotmentApp += ' )'
+
     setOutQueryStringAllotment(outQueryStringAllotmentApp)
-  }, [allotAccept, allotReject, allotReview])
+  }, [allotAccept, allotReject, allotReview, allotmentValue, allotGroupValue])
 
   useEffect(() => {
     if (sharedState.isSearching) {
@@ -82,6 +100,7 @@ const Allotments = ({ sharedState, styles }) => {
 
     let query
     query = allotLayer.createQuery()
+    console.log(queryString)
     query.where = queryString
     query.returnGeometry = true
     query.outFields = ['*']
@@ -173,7 +192,7 @@ const Allotments = ({ sharedState, styles }) => {
                 value={allotGroupValue}>
                  {sharedState.allotGroupList?.map(year =>
                     <Option
-                    value={year.attributes.ALLOT_GRP_IDALLOT_GRP_ID}>
+                    value={year.attributes.ALLOT_GRP_ID}>
                         {year.attributes.ALLOT_GRP_ID + '-' + year.attributes.ALLOT_GRP_NM}
                     </Option>
                  )}

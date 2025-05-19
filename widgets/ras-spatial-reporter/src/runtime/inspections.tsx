@@ -25,6 +25,10 @@ const Inspections = ({ sharedState, featureForInspection, startInspection, style
     }
   }, [sharedState.isRefreshing])
 
+  // useEffect(() => {
+  //   queryAllComplianceRecords()
+  // }, [sharedState.isSearching])
+
   useEffect(() => {
     if (startInspection) {
       queryAllComplianceRecords()
@@ -141,7 +145,8 @@ const Inspections = ({ sharedState, featureForInspection, startInspection, style
       InspectionQueryLayer.queryFeatures(query).then(function (result) {
         if (result.features.length > 0) {
           const features = result
-          // console.log('Inspection features:', features)
+
+          console.log('Inspection features:', features)
           sharedState.setInspectionFeatures(features)
           sharedState.setTriggerFeatureQuery(true)
         }

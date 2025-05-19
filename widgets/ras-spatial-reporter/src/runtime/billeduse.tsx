@@ -90,6 +90,21 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
     })
   }
 
+  function checkBillUseAllQuery (queryAuthString: string) {
+    // ADD queryauth but couldnt we just query it alone without it?
+    // just quuery with getAllBillUsedQueryString?
+    let billUseAllQuery = getAllBillUsedQueryString()
+
+    if (billUseAllQuery !== '' && queryAuthString !== '' && queryAuthString !== undefined) {
+      billUseAllQuery = billUseAllQuery + ' AND ' + queryAuthString
+    } else {
+      if (queryAuthString !== '' && queryAuthString !== undefined) {
+        billUseAllQuery = queryAuthString
+      }
+    }
+    return billUseAllQuery
+  }
+
   function queryAllBillUsedRecords () {
     const features = featuresForBilled
     let queryAuthString
@@ -105,15 +120,7 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
         //remove the last comma
         queryAuthString = queryAuthString.substring(0, queryAuthString.length - 1) + ')'
       }
-      let billUseAllQuery = getAllBillUsedQueryString()
-
-      if (billUseAllQuery !== '' && queryAuthString !== '' && queryAuthString !== undefined) {
-        billUseAllQuery = billUseAllQuery + ' AND ' + queryAuthString
-      } else {
-        if (queryAuthString !== '' && queryAuthString !== undefined) {
-          billUseAllQuery = queryAuthString
-        }
-      }
+      const billUseAllQuery = checkBillUseAllQuery(queryAuthString)
       // console.log(billUseAllQuery)
       if (billUseAllQuery !== '') {
         const BillQueryLayerUrl = config.queryLayers.RasReportBillUsedVW
@@ -144,6 +151,10 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
   useEffect(() => {
     queryAllBillUsedRecords()
   }, [startBilled])
+
+  // useEffect(() => {
+  //   queryAllBillUsedRecords()
+  // }, [startBilled])
 
   function handleCheckBoxChange (checkboxid, checked) {
     if (checkboxid === 'burro') {
@@ -404,12 +415,10 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
                 onChange={handleGrazingYear}
                 value={grazingYear}>
               {billYearOptions?.map(year =>
-                          <Option
-                          value={year.attributes.GRAZING_FEE_YEAR_TX
-                          }>
-                              {year.attributes.GRAZING_FEE_YEAR_TX
-                              }
-                          </Option>
+                  <Option
+                  value = { year.attributes.GRAZING_FEE_YEAR_TX }>
+                      { year.attributes.GRAZING_FEE_YEAR_TX }
+                  </Option>
               )}
                 </Select>
               </div>
@@ -422,12 +431,10 @@ const BilledUse = ({ sharedState, setFeatureForInspection, setStartInspection, s
                 onChange={handleScheduleType}
                 value={scheduleType}>
                   {billScheduleOptions?.map(year =>
-                          <Option
-                          value={year.attributes.USE_TYPE_NM
-                          }>
-                              {year.attributes.USE_TYPE_NM
-                              }
-                          </Option>
+                    <Option
+                    value = { year.attributes.USE_TYPE_NM }>
+                        { year.attributes.USE_TYPE_NM }
+                    </Option>
                   )}
                 </Select>
               </div>
